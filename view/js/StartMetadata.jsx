@@ -12,12 +12,12 @@ export default class StartMetadata extends Component {
 	render(){
 		return(
 			<div>
-				<form className="startMetadata"> 
+				<form> 
 					<div className="row">
 						<label className="col-25">
 							Expected Values
 						</label>
-						<select>
+						<select className="col-75">
 							<option>meme</option>
 						</select>
 					</div>
@@ -26,7 +26,7 @@ export default class StartMetadata extends Component {
 						<label className="col-25">
 							Institution
 						</label>
-						<input type="select" name="institution">
+						<input type="select" name="institution" className='col-75'>
 						
 						</input>
 					</div>
@@ -35,7 +35,7 @@ export default class StartMetadata extends Component {
 						<label className="col-25">
 							Wiring
 						</label>
-						<input type="select" name="wiring">
+						<input type="select" name="wiring" className='col-75'>
 						
 						</input>
 					</div>
@@ -44,7 +44,7 @@ export default class StartMetadata extends Component {
 						<label className="col-25">
 							VIB
 						</label>
-						<input type="select" name="vib">
+						<input type="select" name="vib" className='col-75'>
 						
 						</input>
 					</div>
@@ -53,7 +53,7 @@ export default class StartMetadata extends Component {
 						<label className="col-25">
 							Device
 						</label>
-						<input type="select" name="device">
+						<input type="select" name="device" className='col-75'>
 						
 						</input>
 					</div>
@@ -62,7 +62,7 @@ export default class StartMetadata extends Component {
 						<label className="col-25">
 							Temperature (Celsius)
 						</label>
-						<input type="textarea" name="temperature">
+						<input type="textarea" name="temperature" className='col-75'>
 						
 						</input>
 					</div>

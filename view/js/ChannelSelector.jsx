@@ -17,17 +17,22 @@ export default class ChannelSelector extends Component{
 		let result = names.map(this.initialChannelRender);
 		
 		return(
-			<div key={t} className="selection-row">
+			<div key={t} className="selection-column">
 				<h2 className="selection-header"> {t} </h2><br/>
-				{result}
+				<div key={t} className="selection-row">
+					{result}
+				</div>
 			</div>
 		);	
 	}
 
 	initialChannelRender(n){
 		return(
-			<label key={n[0]}> {n[1]}
-				<input type="checkbox" checked={this.props.checked[n[0]] || false} key={n[0]} onChange={this.props.callback.bind(this, n[0])}/>
+			<label key={n[0]}> 
+				<input type="checkbox" 
+					checked={this.props.checked[n[0]] || false} key={n[0]} 
+					onChange={this.props.callback.bind(this, n[0])}/>
+					{n[1]}
 			</label>	
 		);
 	}

@@ -12,17 +12,20 @@ export default class SignalSelector extends Component{
 		let signals = type['signals']
 		let result = signals.map(this.initialSelectorRender);
 		return(
-			<div key={t} className="selection-row">
+			<div key={t} className="selection-column">
 				<h2 className="selection-header"> {t} </h2>
-				{result}
+				<div key={t} className="selection-row">
+					{result}
+				</div>
 			</div>
 		);
 	}	
 	
 	initialSelectorRender(n){
 		return(
-			<label key={n}> {n}
+			<label key={n}> 
 				<input type="checkbox" checked={this.props.checked[n]} key={n} onChange={this.props.callback.bind(this, n)}/>
+				{n}
 			</label>
 			);
 	}

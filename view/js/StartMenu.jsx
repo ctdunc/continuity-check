@@ -16,6 +16,7 @@ export default class StartMenu extends Component {
 		this.displaySignalLayout = this.displaySignalLayout.bind(this);
 		this.updateSignal = this.updateSignal.bind(this);
 		this.updateChannel = this.updateChannel.bind(this);
+		this.submitTests = this.submitTests.bind(this);
 		this.state = {layout: [], signals:[], selectedSignals:[], selectedChannels:[], tests:{'connected':false,'disconnected':false}}
 		this.getLayout('channel-layout', this.displayChannelLayout);
 		this.getLayout('signal-list',this.displaySignalLayout);
@@ -79,18 +80,32 @@ export default class StartMenu extends Component {
 			}
 		});
 	}
+	submitTests(e){
+		console.log(this.state);
+	}
 
 	render(){
 		return(
-			<div className="currentCheck">
-				<StartMetadata/>
-				<div className='left-50'>
-					<ChannelSelector layout={this.state.layout} callback={this.updateChannel} checked={this.state.selectedChannels} />
+			<div className="startMenu">
+				<div className='startMetadata'>
+					<StartMetadata />
 				</div>
-				<div className='right-50'>
-					<SignalSelector signals={this.state.signals} callback={this.updateSignal} checked={this.state.selectedSignals} />
+				<div className="test-selector">
+					<div className='left-50'>
+						<h1 className="channelHeader"> Select Channels </h1>
+						<ChannelSelector layout={this.state.layout} 
+							callback={this.updateChannel} 
+							checked={this.state.selectedChannels} />
+					</div>
+					<div className='right-50'>
+						<h1 className="signalHeader"> Select Signals </h1>
+						<SignalSelector signals={this.state.signals} 
+							callback={this.updateSignal} 
+							checked={this.state.selectedSignals} />
+					</div>
 				</div>
 				<div className='bottom-100'>
+					<b className="continuity-label"> Select Continuity:</b>
 					<label> Connected 
 						<input type='checkbox' 
 							onChange={this.updateTests.bind(this, 'connected')}/>
@@ -100,6 +115,7 @@ export default class StartMenu extends Component {
 							onChange={this.updateTests.bind(this, 'disconnected')}/>
 					</label>
 				</div>
+				<button type="submit" onClick={this.submitTests}> Start Check </button>
 			</div>
 		);
 	}
