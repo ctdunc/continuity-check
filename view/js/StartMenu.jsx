@@ -114,8 +114,8 @@ export default class StartMenu extends Component {
 						<input type='checkbox'
 							onChange={this.updateTests.bind(this, 'disconnected')}/>
 					</label>
+					<button type="submit" onClick={this.submitTests}> Start Check </button>
 				</div>
-				<button type="submit" onClick={this.submitTests}> Start Check </button>
 			</div>
 		);
 	}

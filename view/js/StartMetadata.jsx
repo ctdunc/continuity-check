@@ -11,7 +11,7 @@ export default class StartMetadata extends Component {
 
 	render(){
 		return(
-			<div>
+			<div className="metadata">
 				<form> 
 					<div className="row">
 						<label className="col-25">
