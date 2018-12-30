@@ -30,7 +30,6 @@ export default class ChannelSelector extends Component{
 		return(
 			<label key={n[0]}> 
 				<input type="checkbox" 
-					checked={this.props.checked[n[0]] || false} key={n[0]} 
 					onChange={this.props.callback.bind(this, n[0])}/>
 					{n[1]}
 			</label>	

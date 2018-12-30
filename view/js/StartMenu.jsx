@@ -17,11 +17,17 @@ export default class StartMenu extends Component {
 		this.updateSignal = this.updateSignal.bind(this);
 		this.updateChannel = this.updateChannel.bind(this);
 		this.submitTests = this.submitTests.bind(this);
-		this.state = {layout: [], signals:[], selectedSignals:[], selectedChannels:[], tests:{'connected':false,'disconnected':false}}
+		this.state = {layout: [], 
+			signals:[], 
+			selectedSignals:[],
+			selectedChannels:[],
+			tests: []}
 		this.getLayout('channel-layout', this.displayChannelLayout);
 		this.getLayout('signal-list',this.displaySignalLayout);
 	}
-
+	componentDidUpdate(){
+		console.log(this.state);
+	}
 	getLayout(u, cb){
 		$.get(window.location.href+u, (response) => {
 			cb(response);
@@ -41,54 +47,61 @@ export default class StartMenu extends Component {
 	}
 	
 	updateSignal(key, e){
-		if(this.state.selectedSignals[key]==null){
-			this.setState({
-				selectedSignals: {
-					[key]: true
-				}
-			});
+		var signals = this.state.selectedSignals
+		var index = signals.indexOf(key);
+		if(index==-1){
+			signals = [...signals, key]
 		}
 		else{
-			this.setState({
-				selectedSignals: {
-					[key]: !this.state.selectedSignals[key]
-				}
-			});
+			signals.splice(index,1);
 		}
+		this.setState({selectedSignals:signals});
 	}
 
 	updateChannel(key, e){
-		if(this.state.selectedChannels[key]==null){
-			this.setState({
-				selectedChannels: {
-					[key]: true
-				}
-			});
+		var channels = this.state.selectedChannels
+		var index = channels.indexOf(key)
+		if(index==-1){
+			channels = [...channels,key]
 		}
 		else{
-			this.setState({
-				selectedChannels: {
-					[key]: !this.state.selectedChannels[key]
-				}
-			});
+			channels.splice(index,1);
 		}
+		this.setState({selectedChannels: channels})
 	}
+	
 	updateTests(key, e){
-		this.setState({
-			tests:{
-				[key]: !this.state.tests[key]
-			}
-		});
+		var tests = this.state.tests
+		var index = tests.indexOf(key)
+		if(index==-1){
+			tests = [...tests,key]
+		}
+		else{
+			tests = tests.splice(index,1);
+		}
+		this.setState({tests:tests});
 	}
+	
 	submitTests(e){
-		console.log(this.state);
+		$.ajax({
+			type: 'POST',
+			url: '/startcheck',
+			data: {signals: this.state.selectedSignals, 
+				channels: this.state.selectedChannels,
+				continuity: this.state.tests},
+			success: ((data, stat, request) => {
+			}),
+			error: (() => {
+				alert('an error occured');
+			})
+		});
 	}
 
 	render(){
 		return(
 			<div className="startMenu">
 				<div className='startMetadata'>
-					<StartMetadata />
+					<StartMetadata expectedValues={['slac_expected_values', 'berkeley_expected_values']}/>
 				</div>
 				<div className="test-selector">
 					<div className='left-50'>

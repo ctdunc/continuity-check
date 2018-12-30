@@ -1,14 +1,17 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
 
-var $ = require('jquery');
-var socket = io.connect('http://' + document.domain + ':' + location.port);
-
 export default class StartMetadata extends Component {
 	constructor(props,context){
 		super(props,context);
+		this.renderOpt = this.renderOpt.bind(this);
 	}
-
+	
+	renderOpt(opt){
+		return(
+			<option key={opt} value={opt}>{opt}</option>
+			);
+	}
 	render(){
 		return(
 			<div className="metadata">
@@ -17,8 +20,8 @@ export default class StartMetadata extends Component {
 						<label className="col-25">
 							Expected Values
 						</label>
-						<select className="col-75">
-							<option>meme</option>
+						<select className="col-75" name="expectedValue">
+							{this.props.expectedValues.map(this.renderOpt)}
 						</select>
 					</div>
 
@@ -27,7 +30,6 @@ export default class StartMetadata extends Component {
 							Institution
 						</label>
 						<input type="select" name="institution" className='col-75'>
-						
 						</input>
 					</div>
 
@@ -35,8 +37,8 @@ export default class StartMetadata extends Component {
 						<label className="col-25">
 							Wiring
 						</label>
-						<input type="select" name="wiring" className='col-75'>
-						
+						<input type="textarea" name="wiring" className='col-75'>
+								
 						</input>
 					</div>
 
@@ -44,7 +46,7 @@ export default class StartMetadata extends Component {
 						<label className="col-25">
 							VIB
 						</label>
-						<input type="select" name="vib" className='col-75'>
+						<input type="textarea" name="vib" className='col-75'>
 						
 						</input>
 					</div>

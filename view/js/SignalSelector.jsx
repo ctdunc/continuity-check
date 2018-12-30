@@ -24,7 +24,8 @@ export default class SignalSelector extends Component{
 	initialSelectorRender(n){
 		return(
 			<label key={n}> 
-				<input type="checkbox"  key={n} onChange={this.props.callback.bind(this, n)}/>
+				<input type="checkbox"  key={n} onChange={this.props.callback.bind(this, n)}
+				/>
 				{n}
 			</label>
 			);

@@ -107,26 +107,40 @@ class sqlclient:
     def get_expected_value(self, tests=''):
         conn = self.__connect()
         cursor = conn.cursor()
-        if tests:
-            1==1
-        else:
-            cmd = """ SELECT
+        cmd = """ SELECT
                 Signal_1,
+                Channel_1,
                 Signal_2,
+                Channel_2,
                 Expected_Continuity,
                 Minimum,
                 Maximum FROM 
                 """
-
-        ex = cmd + self.expected_values
+        ex = cmd + self.expected_values+tests+';'
         cursor.execute(ex)
 
         data = cursor.fetchall()
         conn.close()
         return data
                 
-    def get_channel_naming(self):
-        return 0       
+    def get_channel_naming(self, tests):
+        conn = self.__connect()
+        cursor = conn.cursor()
+
+        cmd = "\
+            SELECT Matrix_location, \
+            DB_78_pin, \
+            VIB_pin, \
+            Signal_name, \
+            Channel, \
+            Type \
+            FROM \
+            " + self.channel_naming \
+            + tests+";" 
+        cursor.execute(cmd)
+        data=cursor.fetchall()
+        conn.close()
+        return data       
 
     def write_run(self,
             data,
