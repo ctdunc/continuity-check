@@ -4,18 +4,19 @@ import json
 from collections import Counter
 from logic.dmm_interface import dmm_interface
 
-def perform_check(expected_values,channel_naming,dmm_ip=''):
+MSR = 'KEY_MEASUREMENT'
+MSG = 'KEY_MESSAGE'
+ERR = 'KEY_ERROR'
 
+def perform_check(expected_values,channel_naming,dmm_ip=''):
     try:
         dmm = dmm_interface(dmm_ip)
     except:
         pass
     expected_values=np.array(expected_values)
-    channel_naming=np.array(channel_naming)
     yield_data = lambda key,value: {'key':key, 'value':value}
+    channel_naming=np.array(channel_naming)
     tests = []
-    r = 0
-    deleted=0
     for r in range(len(expected_values)):
         row = expected_values[r]
         try:
@@ -39,19 +40,63 @@ def perform_check(expected_values,channel_naming,dmm_ip=''):
     # perform connected tests
     for row in tests_connect:
         #naming done below for code legibility
-        ch1,s1,ch2,s2,continuity,mini,maxi,matrix1,matrix2=row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8]
+        mini,maxi,matrix1,matrix2 = row[5],row[6],row[7],row[8]
+        
+        # TODO: perform connected tests
+        # measurement = dmm.test_individual(matrix1,matrix2)
+        measurement = 1
+        if float(mini) < measurement < float(maxi):
+            success = 1
+        else:
+            success = 0
+        return_row = np.hstack([row[:6],[success,measurement]])
+        yield yield_data(key=MSR,value=return_row)
+
         
     # perform disconnected tests
     # first, group signals by frequency (so that we find more errors per test)
     sig_by_freq = Counter(np.array([tests_disconnect[:,8],tests_disconnect[:,7]]).flatten())
     for s1 in sig_by_freq:
-        s1_first = tests_disconnect[np.where(tests_disconnect[:,7]==s1)]
-        s1_second = tests_disconnect[np.where(tests_disconnect[:,8]==s1)]
+        #for more frequent signals (s1), find every node it *isn't* connected to, and test them against s1 all at once
+        indices = np.hstack([np.where(tests_disconnect[:,7]==s1),np.where(tests_disconnect[:,8]==s1)])
 
-        s2_list = np.array([s1_first[:,8],s1_second[:,7]]).flatten()
-        print(s2_list)
-    return 0
+        if not indices.size:
+            # means there are no tests in the array for s1, so continue loop
+            # (I would use break here, but use continue in case there are more tests left for different signals)
+            continue 
+        rows = tests_disconnect[indices][0]
+        for i in parallell_disconnect(s1,rows,dmm=''):
+            print(i)
+        tests_disconnect = np.delete(tests_disconnect,indices,axis=0)
 
+def parallell_disconnect(s1,rows,dmm):
+    s1_first = rows[np.where(rows[:,7]==s1)]
+    s1_second = rows[np.where(rows[:,8]==s1)]
+    s2_list = np.hstack([s1_first[:,8],s1_second[:,7]])
+    minima = rows[:,5]
+    mini = max([float(i) for i in minima.flatten()])
     
-    
-
+    #perform check
+    # measurement = dmm.test_parallell(s1,s2_list)
+    measurement = 1
+    if measurement > mini:
+        success = 1
+        return_rows = [np.hstack([r,[success,measurement]]) for r in rows]
+        yield return_rows
+    else:
+       rows_split = np.array_split(rows,2)
+       for c in rows_split:
+           if len(c)>1:
+               yield from parallell_disconnect(s1,c,dmm)
+           elif len(c)==1:
+               c = c[0]
+               #measurement = dmm.test_individual(c[7],c[8])
+                measurement = 1
+                if mini < measurement:
+                    success = 1
+                else: 
+                    success = 0
+                return_row = np.hstack([c[0],[success,measurement]])
+                yield return_row
+           else:
+               break

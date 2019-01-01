@@ -30,7 +30,9 @@ socketio = SocketIO(app)
 
 @celery.task(bind=True)
 def continuity_check(self,expected_values, channel_naming, dmm_ip=''):
-    perform_check(expected_values, channel_naming, dmm_ip) 
+    result_generator = perform_check(expected_values, channel_naming, dmm_ip) 
+    for i in result_generator:
+        continue
     return 0
 
 @app.route("/")
