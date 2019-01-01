@@ -77,8 +77,10 @@ def startcheck():
     cont = ''
     if 'connected' in tests:
         cont += '1'
-    if 'disconnected' in tests:
-        cont += '0'
+        if 'disconnected' in tests:
+            cont+=',0'
+    elif 'disconnected' in tests:
+        cont='0'
 
     continuity_command = ' (Expected_Continuity IN ('+cont+'))'
     test_command = ' WHERE ('

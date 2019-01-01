@@ -79,6 +79,7 @@ export default class StartMenu extends Component {
 		else{
 			tests = tests.splice(index,1);
 		}
+		console.log(tests);
 		this.setState({tests:tests});
 	}
 	
