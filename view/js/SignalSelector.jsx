@@ -32,7 +32,7 @@ export default class SignalSelector extends Component{
 	}
 	render(){
 		return(
-		<div className="signal-selector">
+		<div className="opt">
 			{this.props.signals.map(this.generateSelectors)}
 		</div>
 		);

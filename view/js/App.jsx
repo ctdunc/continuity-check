@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import DisplayManager from './DisplayManager';
+import ProgressBar from './ProgressBar';
 
 
 import '../css/App.css';
@@ -23,12 +24,17 @@ export default class ContinuityApp extends Component{
 	}
 	render(){
 		return(
-			<div className="page">
+			<div className="flex-container">
 				<div className="header">
-					<button onMouseDown={this.showStartMenu}>Start Check</button>
-					<button onMouseDown={this.showDataDisplay}>View Data</button>
+					<div className="top-50">
+						<button onMouseDown={this.showStartMenu}>Start Check</button>
+						<button onMouseDown={this.showDataDisplay}>View Data</button>
+					</div>
+					<div className="bottom-50">
+						<ProgressBar />
+					</div>
 				</div>
-				<div className="content">
+				<div className="display">
 					<DisplayManager show={this.state.show}/>
 				</div>
 			</div>

@@ -18,16 +18,18 @@ const checkCols = [
 	{Header: "Signal",
 		columns: [
 			{Header:"Signal 1",accessor:'0'},
-			{Header:"Signal 2",accessor:'1'},
+			{Header:"Channel 1", accessor:'1'},
+			{Header:"Signal 2",accessor:'2'},
+			{Header:"Channel 2", accessor:'3'}
 			]
 	},
 	{Header: "Continuity",
 		columns: [
-			{Header:"Minimum",accessor:'2'},
-			{Header:"Maximum",accessor:'3'},
-			{Header:"Measured",accessor:'4'},
-			{Header:"Unit",accessor:'5'},
-			{Header:"Passed",accessor:'6'}
+			{Header:"Minimum",accessor:'4'},
+			{Header:"Maximum",accessor:'5'},
+			{Header:"Measured",accessor:'6'},
+			{Header:"Unit",accessor:'7'},
+			{Header:"Passed",accessor:'8'}
 		]}
 ]
 class DataDisplay extends Component{

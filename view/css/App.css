@@ -1,43 +1,87 @@
 body{
+	height:100%;
+	width:100%;
+	margin:0;
 	max-width:100vw;
 	max-height: 100vh;
+	overflow:hidden;
 }
-/* Top Level Styling */
-.page{
-	width:100%;
-	height: 100%;
-	max-width: 100%;
-	max-height: 100%;
-}
+
 .header{
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: inherit;
-	height: 5%;
-	z-index: 1;
+	opacity:1;
+	position:sticky;
+	top:0;
+	background:#FFFFFF;
+	width:100%;
 }
-.content{
-	position: absolute;
-	top: 5vh;
-	left: 0;
-	width: inherit; 
-	height: 95%;
+.display{
+	width:100%;
 }
 
-/* Start Check Styling */
-.startMenu{
-	display:grid;
-	height:95%;
-	grid-template-rows:30% 60% auto;
-	grid-template-columns: auto;
+/* table styling */
+.rt-thead{
+	position:sticky;
+}
+.rt-tbody{
+	overflow:auto;
+}
+.pagination-bottom{
+	position:sticky;
+	bottom:0;
+	background:#FFFFFF;
 }
 
-
-/* Metadata Styling */
-.startMetadata{
-	grid-row:1;
+/* menu styling */
+.menu {
+	margin:0;
+	width:100%;
+	height:auto;
+	overflow:auto;
 }
+.menu>.metadata{
+	height:200px;
+	display:flex;
+	flex-direction:column;
+}
+
+/* test selection styling */
+.menu>.test-selectors{
+	display:flex;
+	flex-direction:row;
+	height:auto;
+	flex-wrap:wrap;
+}
+.selector{
+	flex:50%;
+	display:flex;
+	flex-direction:column;
+	height:100%;
+	overflow:auto;
+}
+.opt{
+	display:flex;
+	flex-direction:row;
+}
+.selection-column{
+	padding-right:40px;
+}
+.selection-row{
+	display:flex;
+	flex-direction:column;
+	justify-content:space-around;
+	flex-wrap:wrap;
+}
+
+/* continuity selection styling */
+.bottom-100{
+	position:sticky;
+	bottom:0;
+	width:100%;
+	height:30px;
+}
+
+/* metadata styling */
+
 .col-25{
 	float:left;
 	width:25%;
@@ -53,64 +97,4 @@ body{
 	content:"";
 	display:table;
 	clear:both;
-}
-/* Test Selection Styling */
-.left-50{
-	float:left;
-	width:48%;
-}
-.right-50{
-	float:right;
-	width:48%;
-}
-.test-selector{
-	width:100%;
-	height:auto;
-	max-height:80%;
-	grid-row:2;
-}
-.startMetadata{
-	width:100%;
-	height:auto;
-	max-height:30%;
-}
-.metadata{
-	height:auto;
-	width: 100%;
-}
-ChannelSelector *{
-	height: auto;
-	overflow: visible;
-}
-SignalSelector *{
-	height:auto;
-}
-.channel-selector{
-	width: 100%;
-	display:inline-grid;
-	grid-template-columns: auto auto auto;
-	grid-column-gap: 15%;
-	height:100%;
-}
-.signal-selector{
-	width: 100%;
-	display:inline-grid;
-	grid-template-columns: auto auto auto;
-	grid-column-gap: 15%;
-	height:100%;
-}
-.selection-row{
-	display:grid;
-	max-height: inherit;
-	justify-content:left;
-	align-content:start;
-	overflow: auto;
-}
-.selection-column{
-	max-height:100%;
-	height:auto;
- }
- /* Continuity Selection Styling */
-.bottom-100{
-	grid-row:3;
 }

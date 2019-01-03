@@ -19,7 +19,6 @@ conn = MySQLdb.connect(
     host=host,
     db=db)
 cursor=conn.cursor()
-# DB 78 pin VIB pin  Signal name  Notes
 
 inect = """
 CREATE TABLE IF NOT EXISTS channel_naming (Matrix_location VARCHAR(5), DB_78_pin VARCHAR(5), VIB_pin VARCHAR(5), Signal_name VARCHAR(20), Channel int, Type VARCHAR(10));

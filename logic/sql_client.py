@@ -7,10 +7,11 @@ import datetime
 tabne = 'CREATE TABLE IF NOT EXISTS ' # tabne short for TABle Not Exists
 
 class sqlclient:
-    def __init__(self, host, db, user, pw, history, naming, expected):
+    def __init__(self, host, db, user, pw, history, naming, expected,metadata):
         self.run_history = history
         self.channel_naming = naming
         self.expected_values = expected
+        self.metadata = metadata
         self.host = host
         self.user = user
         self.pw = pw
@@ -48,7 +49,7 @@ class sqlclient:
     def get_signal_list(self):
         conn = self.__connect()
         cursor = conn.cursor()
-        command = "SELECT DISTINCT Signal_name, Type FROM "+self.channel_naming;
+        command = "SELECT DISTINCT Signal_name, Type FROM "+self.channel_naming+";"
         cursor.execute(command)
         res = cursor.fetchall()
 
@@ -90,7 +91,9 @@ class sqlclient:
         cursor = conn.cursor()
         cmd = """ SELECT
             Signal_1,
+            Channel_1,
             Signal_2,
+            Channel_2,
             Minimum,
             Maximum,
             Measured,
@@ -123,7 +126,7 @@ class sqlclient:
         conn.close()
         return data
                 
-    def get_channel_naming(self, tests):
+    def get_channel_naming(self):
         conn = self.__connect()
         cursor = conn.cursor()
 
@@ -135,21 +138,19 @@ class sqlclient:
             Channel, \
             Type \
             FROM \
-            " + self.channel_naming \
-            + tests+";" 
+            " + self.channel_naming+ ";"
         cursor.execute(cmd)
         data=cursor.fetchall()
         conn.close()
         return data       
 
-    def write_run(self,
-            data,
-            institution,
-            vib,
-            wiring,
-            device,
-            temp,
-            validation_table):
+    def create_run_table(self,
+            institution='',
+            vib='',
+            wiring='',
+            device='',
+            temp='',
+            validation_table=''):
         conn = self.__connect()
         cursor = conn.cursor()
         
@@ -157,7 +158,7 @@ class sqlclient:
         chars = string.ascii_letters
         gname = lambda n, func:(
                    n if not (
-                       cursor.execute("SHOW TABLES LIKE "+n)
+                       cursor.execute("SHOW TABLES LIKE \'"+n+"\';")
                        )
                    else func(chars)
                 )
@@ -169,7 +170,9 @@ class sqlclient:
             CREATE TABLE IF NOT EXISTS
             {name} (
             Signal_1 VARCHAR(20),
+            Channel_1 INT,
             Signal_2 VARCHAR(20),
+            Channel_2 INT,
             Minimum FLOAT(8),
             Maximum FLOAT(8),
             Measured FLOAT(8),
@@ -204,36 +207,60 @@ class sqlclient:
                         val=validation_table,
                         date=datetime.datetime.now().strftime('%Y-%m-%d %x'))
         cursor.execute(cmd)
-        
+        conn.commit()
+        conn.close()
+        return name
+
+    def insert_run_row(self, tablename, value):
+        print(value)
+        conn = self.__connect()
+        cursor = conn.cursor()
         cmd = """
             INSERT INTO
                 {table} (
                 Signal_1,
+                Channel_1,
                 Signal_2,
+                Channel_2,
                 Minimum,
                 Maximum,
                 Measured,
                 Unit,
                 Pass) 
             VALUES (
-                {s1},
-                {s2},
+               \"{s1}\",
+               \"{c1}\",
+               \"{s2}\",
+               \"{c2}\",
                 {mi},
                 {ma},
                 {me},
-                {u},
+                \"{u}\",
                 {p});
                 """
-        for data in data:
-            ex = cmd.format(table=name,
-                    s1=data['Signal 1'],
-                    s2=data['Signal 2'],
-                    mi=data['Minimum'],
-                    ma=data['Maximum'],
-                    me=data['Measured'],
-                    u=data['Unit'],
-                    p=data['Pass'])
-            cursor.execute(ex)
+        cmd = cmd.format(
+                table=tablename,
+                s1=value[0],
+                c1=value[1],
+                s2=value[2],
+                c2=value[3],
+                mi=float(value[5]),
+                ma=value[6],
+                me=value[10],
+                p=bool(value[9]),
+                u='Ohm'
+                )
+        cursor.execute(cmd)
         conn.commit()
         conn.close()
         return 0
+
+    def get_allowable_metadata(self):
+        conn = self.__connect()
+        cursor = conn.cursor()
+        cmd = "SELECT Expected_Values, Institution, Wiring, Device FROM "+self.metadata+";"
+        cursor.execute(cmd)
+        data = cursor.fetchall()
+        conn.close()
+        return data
+

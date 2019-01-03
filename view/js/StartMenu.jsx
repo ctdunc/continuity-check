@@ -14,6 +14,7 @@ export default class StartMenu extends Component {
 		super(props,context);
 		this.displayChannelLayout = this.displayChannelLayout.bind(this);
 		this.displaySignalLayout = this.displaySignalLayout.bind(this);
+		this.displayMetadata = this.displayMetadata.bind(this);
 		this.updateSignal = this.updateSignal.bind(this);
 		this.updateChannel = this.updateChannel.bind(this);
 		this.submitTests = this.submitTests.bind(this);
@@ -21,16 +22,25 @@ export default class StartMenu extends Component {
 			signals:[], 
 			selectedSignals:[],
 			selectedChannels:[],
-			tests: []}
+			tests: [],
+			metadata:{expected:[],device:[],inst:[],wiring:[]}
+		}
 		this.getLayout('channel-layout', this.displayChannelLayout);
 		this.getLayout('signal-list',this.displaySignalLayout);
+		this.getLayout('allowable-metadata', this.displayMetadata);
 	}
 	componentDidUpdate(){
-		console.log(this.state);
 	}
 	getLayout(u, cb){
 		$.get(window.location.href+u, (response) => {
 			cb(response);
+		});
+	}
+
+	displayMetadata(data){
+		console.log(data);
+		this.setState({
+			metadata: data
 		});
 	}
 
@@ -71,16 +81,7 @@ export default class StartMenu extends Component {
 	}
 	
 	updateTests(key, e){
-		var tests = this.state.tests
-		var index = tests.indexOf(key)
-		if(index==-1){
-			tests = [...tests,key]
-		}
-		else{
-			tests = tests.splice(index,1);
-		}
-		console.log(tests);
-		this.setState({tests:tests});
+		console.log(key,e);
 	}
 	
 	submitTests(e){
@@ -100,22 +101,24 @@ export default class StartMenu extends Component {
 
 	render(){
 		return(
-			<div className="startMenu">
-				<div className='startMetadata'>
-					<StartMetadata expectedValues={['slac_expected_values', 'berkeley_expected_values']}/>
+			<div className='menu'>
+				<div className='metadata'>
+					<StartMetadata options={this.state.metadata} callback={this.updateTests}/>
 				</div>
-				<div className="test-selector">
-					<div className='left-50'>
-						<h1 className="channelHeader"> Select Channels </h1>
-						<ChannelSelector layout={this.state.layout} 
-							callback={this.updateChannel} 
-							checked={this.state.selectedChannels} />
+				<div className='test-selectors'>
+					<div className="selector">
+						<h1>Select Channels </h1>
+							<ChannelSelector layout={this.state.layout} 
+								callback={this.updateChannel} 
+								checked={this.state.selectedChannels} />
 					</div>
-					<div className='right-50'>
-						<h1 className="signalHeader"> Select Signals </h1>
-						<SignalSelector signals={this.state.signals} 
-							callback={this.updateSignal} 
-							checked={this.state.selectedSignals} />
+					<div className='selector'>
+						<h1> Select Signals </h1>
+						<div className='selector-opt'>
+							<SignalSelector signals={this.state.signals} 
+								callback={this.updateSignal} 
+								checked={this.state.selectedSignals} />
+						</div>
 					</div>
 				</div>
 				<div className='bottom-100'>

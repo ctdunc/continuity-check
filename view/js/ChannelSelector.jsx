@@ -38,7 +38,7 @@ export default class ChannelSelector extends Component{
 
 	render(){
 		return(
-			<div className="channel-selector">
+			<div className='opt'>
 				{this.props.layout.map(this.generateChannels)}
 			</div>
 		);
