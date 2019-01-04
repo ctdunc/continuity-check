@@ -12,12 +12,12 @@ Before installing this application, you need the following programs.
 + MySQL
 + Python 3.7+
 	+ and the python package installer `pip`.
-+ (Redis)[https://redis.io/]
-+ (Node Package Manager)[https://npmjs.com]
++ [Redis](https://redis.io/)
++ [ Node Package Manager ]( https://npmjs.com )
 
 First, clone this repository into a folder `continuity-check` using `git clone https://github.com/ctdunc/continuity-check.git continuity-check`.
 
-Second, you will need to set up an SQL database called `continuity_check`, and give the user `cdms` (password: `cdms`) full permissions on this database (MySQL documentation[https://dev.mysql.com/doc/])
+Second, you will need to set up an SQL database called `continuity_check`, and give the user `cdms` (password: `cdms`) full permissions on this database ([MySQL documentation]( https://dev.mysql.com/doc/ ))
 
 Third, you must create a virtual environment to install neccesary python dependencies. Install `virtualenv` using `pip install virtualenv` (this may require root permission).
 
