@@ -244,11 +244,12 @@ class sqlclient:
                 s2=value[2],
                 c2=value[3],
                 mi=float(value[5]),
-                ma=value[6],
-                me=value[10],
+                ma=float(value[6]),
+                me=float(value[10]),
                 p=bool(value[9]),
                 u='Ohm'
                 )
+        print(value[10])
         cursor.execute(cmd)
         conn.commit()
         conn.close()

@@ -1,4 +1,5 @@
 import numpy as np
+import random as rand
 import time
 import json
 from collections import Counter
@@ -42,15 +43,12 @@ def perform_check(expected_values,channel_naming,dmm_ip=''):
     # perform connected tests
     for row in tests_connect:
         #naming done below for code legibility
-        mini,maxi,matrix1,matrix2 = row[5],row[6],row[7],row[8]
-        
-        # TODO: perform connected tests
-        # measurement = dmm.test_individual(matrix1,matrix2)
-        measurement = 1
-        if float(mini) < measurement < float(maxi):
+        mini,maxi,matrix1,matrix2 = float(row[5]),float(row[6]),row[7],row[8]
+        diff = mini-maxi 
+        measurement = rand.uniform(mini-diff,maxi+diff)
+        success = 0
+        if mini < measurement < maxi:
             success = 1
-        else:
-            success = 0
         return_row = np.hstack([row,[success,measurement]])
         yield yield_data(key=MSR,value=return_row.tolist(),n=1)
 
@@ -80,7 +78,7 @@ def parallell_disconnect(s1,rows,dmm):
     
     #perform check
     # measurement = dmm.test_parallell(s1,s2_list)
-    measurement = 4e10 
+    measurement = 0
     if measurement > mini:
         success = 1
         return_rows = [np.hstack([r,[success,measurement]]) for r in rows]
@@ -94,12 +92,11 @@ def parallell_disconnect(s1,rows,dmm):
            elif len(c)==1:
                c = c[0]
                #measurement = dmm.test_individual(c[7],c[8])
-               measurement = 1
+               measurement = rand.uniform(mini-10000,mini+10000)
+               success = 0
                if mini < measurement:
                    success = 1
-               else: 
-                   success = 0
-               return_row = np.hstack([c[:6],[success,measurement]])
+               return_row = np.hstack([c,[success,measurement]])
                yield return_row, 1
            else:
                continue
