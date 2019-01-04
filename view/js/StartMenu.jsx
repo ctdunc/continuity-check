@@ -17,13 +17,16 @@ export default class StartMenu extends Component {
 		this.displayMetadata = this.displayMetadata.bind(this);
 		this.updateSignal = this.updateSignal.bind(this);
 		this.updateChannel = this.updateChannel.bind(this);
-		this.submitTests = this.submitTests.bind(this);
+		this.updateTests = this.updateTests.bind(this);
+		this.updateContinuity = this.updateContinuity.bind(this);
+		this.submit = this.submit.bind(this);
 		this.state = {layout: [], 
 			signals:[], 
 			selectedSignals:[],
 			selectedChannels:[],
-			tests: [],
-			metadata:{expected:[],device:[],inst:[],wiring:[]}
+			tests: {},
+			metadata:{expected:[],device:[],inst:[],wiring:[]},
+			continuity:[]
 		}
 		this.getLayout('channel-layout', this.displayChannelLayout);
 		this.getLayout('signal-list',this.displaySignalLayout);
@@ -38,9 +41,16 @@ export default class StartMenu extends Component {
 	}
 
 	displayMetadata(data){
-		console.log(data);
+		//also creates initial test state with first value obtained from SQL table
+		var tests = {} 
+		let keys = Object.keys(this.state.metadata);
+		for(var k in keys){
+			k = keys[k]
+			tests[k] = data[k][0]
+		}
 		this.setState({
-			metadata: data
+			metadata: data,
+			tests: tests
 		});
 	}
 
@@ -81,16 +91,30 @@ export default class StartMenu extends Component {
 	}
 	
 	updateTests(key, e){
-		console.log(key,e);
+		var tests = this.state.tests;
+		tests[key] = e.target.value
+		console.log(tests);
+	}
+	updateContinuity(key,e){
+		var continuity = this.state.continuity
+		var index = continuity.indexOf(key)
+		if(index==-1){
+			continuity = [...continuity,key]
+		}
+		else{
+			continuity = continuity.splice(index,1);
+		}
+		this.setState({continuity:continuity});
 	}
 	
-	submitTests(e){
+	submit(e){
 		$.ajax({
 			type: 'POST',
 			url: '/startcheck',
 			data: {signals: this.state.selectedSignals, 
 				channels: this.state.selectedChannels,
-				continuity: this.state.tests},
+				continuity: this.state.continuity,
+				metadata: this.state.tests},
 			success: ((data, stat, request) => {
 			}),
 			error: (() => {
@@ -125,13 +149,13 @@ export default class StartMenu extends Component {
 					<b className="continuity-label"> Select Continuity:</b>
 					<label> Connected 
 						<input type='checkbox' 
-							onChange={this.updateTests.bind(this, 'connected')}/>
+							onChange={this.updateContinuity.bind(this, 'connected')}/>
 					</label>
 					<label> Disconnected
 						<input type='checkbox'
-							onChange={this.updateTests.bind(this, 'disconnected')}/>
+							onChange={this.updateContinuity.bind(this, 'disconnected')}/>
 					</label>
-					<button type="submit" onClick={this.submitTests}> Start Check </button>
+					<button type="submit" onClick={this.submit}> Start Check </button>
 				</div>
 			</div>
 		);

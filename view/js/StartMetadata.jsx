@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
 
+const selectinputs = {'expected':'Expected Values', 'inst':'Institution', 'wiring':'Wiring', 'vib':'VIB', 'device':'Device'}
+
 export default class StartMetadata extends Component {
 	constructor(props,context){
 		super(props,context);
 		this.renderOpt = this.renderOpt.bind(this);
-		console.log(this.props)
+		this.renderSelect = this.renderSelect.bind(this);
 	}
 	
 	renderOpt(opt){
@@ -13,75 +15,29 @@ export default class StartMetadata extends Component {
 			<option key={opt} value={opt}>{opt}</option>
 			);
 	}
+	renderSelect(row){
+		var label = row[1]
+		var key = row[0]
+		let opts = this.props.options[key]
+		let result = ['no available options']
+		if(opts!=null){
+			result = opts.map(this.renderOpt)
+		}
+		return(
+			<div key={key} className="row">
+				<label className="col-25">
+					{label}
+				</label>
+				<select name={key} className="col-75" onChange={this.props.callback.bind(this, key)} >
+					{result}
+				</select>
+			</div>
+			);
+	}
 	render(){
 		return(
 			<div>
-				<form> 
-					<div className="row">
-						<label className="col-25">
-							Expected Values
-						</label>
-						<select className="col-75" 
-							name="expectedValue" 
-							onChange={this.props.callback.bind(this,'expectedValue')}>
-							{this.props.options['expected'].map(this.renderOpt)}
-						</select>
-					</div>
-
-					<div className="row">
-						<label className="col-25">
-							Institution
-						</label>
-						<select	name="institution" 
-							className='col-75' 
-							onChange={this.props.callback.bind(this,'insttitution')}>
-							{this.props.options['inst'].map(this.renderOpt)}
-						</select>
-					</div>
-
-					<div className="row">
-						<label className="col-25" >
-							Wiring
-						</label>
-						<select	name="wiring" 
-							className='col-75' 
-							onChange={this.props.callback.bind(this,'wiring')}>
-							{this.props.options['wiring'].map(this.renderOpt)}	
-						</select>
-					</div>
-
-					<div className="row">
-						<label className="col-25">
-							VIB
-						</label>
-						<input name="vib" 
-							className='col-75' 
-							onChange={this.props.callback.bind(this,'vib')}>
-						</input>
-					</div>
-
-					<div className="row">
-						<label className="col-25">
-							Device
-						</label>
-						<select name="device" 
-							className='col-75' 
-							onChange={this.props.callback.bind(this,'device')}>
-							{this.props.options['device'].map(this.renderOpt)}
-						</select>
-					</div>
-					
-					<div className="row">
-						<label className="col-25">
-							Temperature (Celsius)
-						</label>
-						<input type="textarea" 
-							name="temperature" 
-							className='col-75' 
-							onChange={this.props.callback.bind(this,'temperature')} >
-						</input>
-					</div>
-				</form>
+				{Object.entries(selectinputs).map(this.renderSelect)}
 			</div>
 		);
 	}

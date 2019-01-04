@@ -10,6 +10,7 @@ from logic.sql_client import sqlclient
 from logic.continuity import perform_check
 
 findint = re.compile('\d')
+betweenbrackets = re.compile('\[(.*?)\]')
 db = sqlclient('localhost',
         'continuity_check',
         'cdms',
@@ -70,8 +71,17 @@ def startcheck():
     signals = request.form.getlist('signals[]')
     tests = request.form.getlist('continuity[]')
     
+    #metadata has a nested structure, so I need to do some fancy regex searching to get key-value pairs out of URLEncoded data
+    meta_keys = [k for k in request.form.to_dict().keys() if k.startswith('metadata')]
+    metadata = {}
+    for k in meta_keys:
+        sp = betweenbrackets.search(k).span()
+        metadata[k[sp[0]+1:sp[1]-1]] = request.form.getlist(k)[0]
     # create table in database, return name of table to pass to worker
-    tablename = db.create_run_table()
+    tablename = db.create_run_table(institution=metadata['inst'],
+            wiring=metadata['wiring'],
+            device=metadata['device'],
+            validation_table=metadata['expected'])
 
     # format Channel Layout
     channelGrouper = lambda c: [c[findint.search(c).span()[0]:],c[:findint.search(c).span()[0]]]
@@ -111,6 +121,7 @@ def startcheck():
             signal_selector = '((Signal_1 = \"'+signal+'\"  OR (Signal_2 = \"'+signal+'\")) AND (Channel_1 IN '+cstr+' AND Channel_2 IN '+cstr+')) OR'
             matrix_selector = '(Signal_name = \"'+signal+'\" AND Channel IN '+cstr+') OR'
             test_command += signal_selector
+
     #[:-2] gets rid of the final OR statement on the SQL command
     test_command = test_command[:-2]+') AND ('+continuity_command+')'
     expected_values = db.get_expected_value(tests=test_command)

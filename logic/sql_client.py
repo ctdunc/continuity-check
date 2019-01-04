@@ -149,7 +149,7 @@ class sqlclient:
             vib='',
             wiring='',
             device='',
-            temp='',
+            temp=0,
             validation_table=''):
         conn = self.__connect()
         cursor = conn.cursor()
@@ -196,7 +196,7 @@ class sqlclient:
             \"{inst}\", \
             \"{vib}\", \
             \"{dev}\", \
-            \"{temp}\", \
+            {temp}, \
             \"{val}\", \
             \"{date}\" \
                 );").format(check=name,
@@ -212,7 +212,6 @@ class sqlclient:
         return name
 
     def insert_run_row(self, tablename, value):
-        print(value)
         conn = self.__connect()
         cursor = conn.cursor()
         cmd = """
