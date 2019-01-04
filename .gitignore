@@ -1,5 +1,5 @@
 node_modules/
-*.rdb
+dump.rdb
 env/
 __pycache__/
 __init.py__

@@ -29,7 +29,7 @@ Now you can install the requirements of this program with `pip install -r instal
 
 With these requirements installed, enter `install/sql-setup`, and execute each of the python programs in that folder individually. These will enter some sample data into the SQL database.
 
-Finally, enter the `view` folder, and execute `nmp install` to download the neccesary node modules.
+Finally, enter the `view` folder, and execute `npm install` to download the neccesary node modules.
 
 ## Startup
 To start this application, simply execute `startup.sh`, and use firefox (I haven't finished the CSS for Chrome/other browsers yet) to navigate to `127.0.0.1:5000/`.
