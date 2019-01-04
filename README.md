@@ -39,18 +39,18 @@ This is still a work in progress. While it is ready to be used as a logging serv
 Improvements are listed below, in order of priority, with 1 being the highest, 5 being the lowest
 
 + Settings Menu
-	++ (1) Edit/Add Tables of Expected Values
-	++ (1) Change Signal Types, Channel Numbers through web
-	++ (1) Upload csv/xslx expected value tables
-	++ (5) Change look/feel of webpage
+	+ (1) Edit/Add Tables of Expected Values
+	+ (1) Change Signal Types, Channel Numbers through web
+	+ (1) Upload csv/xslx expected value tables
+	+ (5) Change look/feel of webpage
 	
 + Data Export
-	++ (2) txt file
-	++ (2) visualization (bar graph, etc)
+	+ (2) txt file
+	+ (2) visualization (bar graph, etc)
 
 + Real Time Updater
-	++ (1) Failures appear instantly
-	++ (1) clicking on progressbar shows message board
+	+ (1) Failures appear instantly
+	+ (1) clicking on progressbar shows message board
 
 ## License
 This application is distributed under the [GNU Public License](./LICENSE).
