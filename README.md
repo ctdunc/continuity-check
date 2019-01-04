@@ -14,7 +14,7 @@ Before installing this application, you need the following programs.
 + [Redis](https://redis.io/)
 + [ Node Package Manager ]( https://npmjs.com )
 
-First, clone this repository into a folder `continuity-check` using `git clone https://github.com/ctdunc/continuity-check.git continuity-check`.
+First, clone this repository into a folder `continuity-check` using `git clone https://github.com/ctdunc/continuity-check.git`.
 
 Second, you will need to set up an SQL database called `continuity_check`, and give the user `cdms` (password: `cdms`) full permissions on this database ([MySQL documentation]( https://dev.mysql.com/doc/ ))
 
