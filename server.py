@@ -151,28 +151,22 @@ def checkupdate():
     socketio.emit('checkUpdate',data)
     return '0'
 
+     
 @app.route("/channel-layout", methods=['GET'])
 def return_channel_layout():
     n = sorted(db.get_channel_layout(), key=lambda tup: tup[0])
-    channel_layout = []
+    channel_layout = {}
     for key, group in groupby(n, lambda x: x[0]):
         chan_num = -2 
+        siglist = []
         for signal in group: 
+            if signal[2] not in siglist:
+                siglist.append(signal[2])
             if signal[1] > chan_num:
                 chan_num = signal[1]
-        channel_layout.append({'type': key, 'channels': chan_num}) 
+        channel_layout[key]={'channels':chan_num, 'signals':siglist}
+    print(channel_layout)
     return jsonify(channel_layout)
-
-@app.route("/signal-list", methods=['GET'])
-def return_signal_list():
-    siglist = sorted(db.get_signal_list(),key=lambda tup: tup[1])
-    signal_layout = []
-    for key, group in groupby(siglist, lambda x: x[1]):
-        chan_sigs = []
-        for signal in group:
-           chan_sigs.append(signal[0]) 
-        signal_layout.append({'type':key, 'signals':chan_sigs})
-    return jsonify(signal_layout)
 
 @app.route("/allowable-metadata",methods=['GET'])
 def return_metadata():

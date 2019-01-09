@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import DataDisplay from './DataDisplay';
 import StartMenu from './StartMenu';
 
+var $ = require('jquery');
 class DisplayManager extends Component{
 	constructor(props,context){
 		super(props,context);

@@ -27,8 +27,8 @@ export default class ContinuityApp extends Component{
 			<div className="flex-container">
 				<div className="header">
 					<div className="top-50">
-						<button onMouseDown={this.showStartMenu}>Start Check</button>
-						<button onMouseDown={this.showDataDisplay}>View Data</button>
+						<button onClick={this.showStartMenu}>Start Check</button>
+						<button onClick={this.showDataDisplay}>View Data</button>
 					</div>
 					<div className="bottom-50">
 						<ProgressBar />

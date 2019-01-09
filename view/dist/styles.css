@@ -15,6 +15,9 @@ body{
 	background:#FFFFFF;
 	width:100%;
 }
+.header>button{
+	width:50%;
+}
 .display{
 	width:100%;
 }
@@ -33,54 +36,57 @@ body{
 }
 
 /* menu styling */
-.menu {
-	margin:0;
-	width:100%;
-	height:auto;
-	overflow:auto;
-}
-.menu>.metadata{
-	height:200px;
-	display:flex;
-	flex-direction:column;
+.menu{
+	display:grid;
+	height:95%;
+	max-height:95%;
+	grid-template-rows:auto 1fr 60px;
+	grid-template-columns: 1fr 1fr;
 }
 
-/* test selection styling */
-.menu>.test-selectors{
+.channel{
+	grid-column:1 / 1;
+	grid-row: 2 / 2;
+	max-height:90%;
+	padding-right:10px;
+	padding-bottom:10%;
+}
+
+.signal{
+	max-height:90%;
+	grid-column: 2 / 2;
+	grid-row: 2 / 2;
+	padding-bottom:10%;
+}
+
+.select-container{
 	display:flex;
 	flex-direction:row;
-	height:auto;
-	flex-wrap:wrap;
-}
-.selector{
-	flex:50%;
-	display:flex;
-	flex-direction:column;
+	justify-content: space-between;
+	flex-wrap:nowrap;
+	max-height:100%;
 	height:100%;
-	overflow:auto;
 }
-.opt{
-	display:flex;
-	flex-direction:row;
+
+.metadata{
+	grid-column-start: 1;
+	grid-column-end: span 2;
 }
-.selection-column{
-	padding-right:40px;
+
+.continuity{
+	grid-column-start: 1;
+	grid-column-end: span 2;
+	grid-row: 3;
 }
-.selection-row{
+
+.selector{
 	display:flex;
 	flex-direction:column;
-	justify-content:space-around;
-	flex-wrap:wrap;
+	overflow-y:auto;
+	overflow-x:hidden;
+	min-height:0px;
+	max-height:inherit;
 }
-
-/* continuity selection styling */
-.bottom-100{
-	position:sticky;
-	bottom:0;
-	width:100%;
-	height:30px;
-}
-
 /* metadata styling */
 
 .col-25{

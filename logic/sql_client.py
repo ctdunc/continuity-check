@@ -46,16 +46,6 @@ class sqlclient:
         except Exception as e:
             return ('Error in sqlclient.connect! '+str(e))
 
-    def get_signal_list(self):
-        conn = self.__connect()
-        cursor = conn.cursor()
-        command = "SELECT DISTINCT Signal_name, Type FROM "+self.channel_naming+";"
-        cursor.execute(command)
-        res = cursor.fetchall()
-
-        conn.close()
-        return res
-
     def get_channel_layout(self):
         conn =  self.__connect()
         cursor = conn.cursor()
