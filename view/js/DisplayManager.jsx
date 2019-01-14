@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import DataDisplay from './DataDisplay';
-import StartMenu from './StartMenu';
+import DataDisplay from './datadisplay/DataDisplay';
+import StartMenu from './startmenu/StartMenu';
+import ConfigMenu from './configmenu/ConfigMenu';
 
 var $ = require('jquery');
 class DisplayManager extends Component{
@@ -15,11 +16,14 @@ class DisplayManager extends Component{
 			case "datadisplay": 
 				return(<DataDisplay/>);
 				break;
+			case "config":
+				return(<ConfigMenu/>);
+				break;
 			default:
 				return(
 					<div>
 						<h1>
-							Invalid Class
+							How did you even get to this page? Not an option.	
 						</h1>
 					</div>
 				);

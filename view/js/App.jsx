@@ -10,25 +10,21 @@ export default class ContinuityApp extends Component{
 	constructor(props,context){
 		super(props,context);
 		this.state = {show: 'datadisplay'}
+		this.show=this.show.bind(this);	
+
+	}
+	show(key){
+		this.setState({show:key});
+	}
 	
-		this.showStartMenu=this.showStartMenu.bind(this);
-		this.showDataDisplay=this.showDataDisplay.bind(this);
-	}
-	showStartMenu(e){
-		this.setState({show: 'startmenu'});
-		e.stopPropagation();
-	}
-	showDataDisplay(e){
-		this.setState({show: 'datadisplay'});
-		e.stopPropagation();
-	}
 	render(){
 		return(
 			<div className="flex-container">
 				<div className="header">
 					<div className="top-50">
-						<button onClick={this.showStartMenu}>Start Check</button>
-						<button onClick={this.showDataDisplay}>View Data</button>
+						<button onClick={this.show.bind(this,'startmenu')}>Start Check</button>
+						<button onClick={this.show.bind(this,'datadisplay')}>View Data</button>
+						<button onClick={this.show.bind(this,'config')}>Configuration</button>
 					</div>
 					<div className="bottom-50">
 						<ProgressBar />

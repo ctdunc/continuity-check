@@ -7,7 +7,6 @@ body{
 	max-height: 100vh;
 	overflow:hidden;
 }
-
 .header{
 	opacity:1;
 	position:sticky;
@@ -15,22 +14,33 @@ body{
 	background:#FFFFFF;
 	width:100%;
 }
-.header>button{
-	width:50%;
+.header>.top-50{
+	display:flex;
+	flex-wrap:nowrap;
+	flex-direction:row;
+	justify-items:stretch;
+	width:100%;
+}
+.header>.top-50>*{
+	flex-grow:1;
 }
 .display{
 	width:100%;
 }
 
 /* table styling */
+
 .rt-thead{
 	position:sticky;
 }
-.rt-tbody{
+
+.rt-table{
 	overflow:auto;
+	padding-bottom:60px;
 }
 .pagination-bottom{
 	position:sticky;
+	width:100%;
 	bottom:0;
 	background:#FFFFFF;
 }
@@ -104,5 +114,14 @@ body{
 	content:"";
 	display:table;
 	clear:both;
+}
+
+/*customization styling*/
+details{
+	padding-left:20px;
+}
+
+details>.config-container{
+	padding-left:15px;
 }
 

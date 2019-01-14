@@ -11,6 +11,7 @@ from logic.continuity import perform_check
 
 findint = re.compile('\d')
 betweenbrackets = re.compile('\[(.*?)\]')
+findhyphen = re.compile('[^-]*')
 db = sqlclient('localhost',
         'continuity_check',
         'cdms',
@@ -18,7 +19,7 @@ db = sqlclient('localhost',
         'continuity_history',
         'channel_naming',
         'slac_expected_values',
-        'check_metadata')
+        'metadata')
 
 app = Flask(__name__, static_folder="./view/dist", template_folder="./view")
 
@@ -70,7 +71,9 @@ def startcheck():
     channels = request.form.getlist('channels[]')
     signals = request.form.getlist('signals[]')
     tests = request.form.getlist('continuity[]')
-    
+    signal_g = lambda x,s: s[x[0]:x[1]]
+    signals = [signal_g(findhyphen.search(i).span(),i) for i in signals]
+    print(signals)
     #metadata has a nested structure, so I need to do some fancy regex searching to get key-value pairs out of URLEncoded data
     meta_keys = [k for k in request.form.to_dict().keys() if k.startswith('metadata')]
     metadata = {}
@@ -78,13 +81,13 @@ def startcheck():
         sp = betweenbrackets.search(k).span()
         metadata[k[sp[0]+1:sp[1]-1]] = request.form.getlist(k)[0]
     # create table in database, return name of table to pass to worker
-    tablename = db.create_run_table(institution=metadata['inst'],
+    tablename = db.create_run_table(institution=metadata['institution'],
             wiring=metadata['wiring'],
             device=metadata['device'],
             validation_table=metadata['expected'])
 
     # format Channel Layout
-    channelGrouper = lambda c: [c[findint.search(c).span()[0]:],c[:findint.search(c).span()[0]]]
+    channelGrouper = lambda c: [c[findint.search(c).span()[0]:],c[:findint.search(c).span()[0]-1]]
     channels = sorted([channelGrouper(c) for c in channels], key=lambda x: x[1])
     channel_tests = []
     for t, num in groupby(channels, lambda x: x[1]):
@@ -92,16 +95,17 @@ def startcheck():
     channels = dict(channel_tests)
 
     # format Signal Layout
-    signalGrouper = lambda c: [c[0], c[1]]
-    signal_types = sorted([signalGrouper(s) for s in db.get_signal_list()],key=lambda x: x[1])
+    signalGrouper = lambda c: [c[2], c[0]]
+    signal_types = sorted([signalGrouper(s) for s in db.get_channel_layout()],
+            key=lambda x: x[1])
     signal_types_dummy = {}
     for t, sig in groupby(signal_types, lambda x: x[1]):
         for s in sig:
+            print(s[0],s[1])
             if s[0] in signals:
                 signal_types_dummy.setdefault(s[1], []).append(s[0])
     signal_keys = list(filter(lambda k: k in channels.keys(),signal_types_dummy.keys()))
     signal_types = dict([(k,signal_types_dummy[k]) for k in signal_keys])
-
     # get expected values, format/execute SQL request for expected values
     cont = ''
     if 'connected' in tests:
@@ -124,6 +128,7 @@ def startcheck():
 
     #[:-2] gets rid of the final OR statement on the SQL command
     test_command = test_command[:-2]+') AND ('+continuity_command+')'
+    print(test_command)
     expected_values = db.get_expected_value(tests=test_command)
     matrix_values = db.get_channel_naming() 
 
@@ -165,23 +170,18 @@ def return_channel_layout():
             if signal[1] > chan_num:
                 chan_num = signal[1]
         channel_layout[key]={'channels':chan_num, 'signals':siglist}
-    print(channel_layout)
     return jsonify(channel_layout)
 
 @app.route("/allowable-metadata",methods=['GET'])
 def return_metadata():
     metadata = db.get_allowable_metadata()
-    e, i, w, d = [],[],[],[]
-    for row in metadata:
-        expected = row[0]
-        institution = row[1]
-        wiring = row[2]
-        device = row[3]
-        e.append(expected)
-        i.append(institution)
-        w.append(wiring)
-        d.append(device)
-    result = {'expected':e,'inst':i,'wiring':w,'device':d}
+    n = sorted(metadata, key=lambda tup:tup[1])
+    result = {}
+    for key, elements in groupby(n, lambda n: n[1]):
+        result[key] = []
+        for e in elements:
+            result[key].append(e[0])
+    print(result)
     return jsonify(result)
 
 if __name__ == "__main__":

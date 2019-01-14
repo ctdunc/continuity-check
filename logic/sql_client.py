@@ -245,10 +245,10 @@ class sqlclient:
         conn.close()
         return 0
 
-    def get_allowable_metadata(self):
+    def get_allowable_metadata(self,tests=""):
         conn = self.__connect()
         cursor = conn.cursor()
-        cmd = "SELECT Expected_Values, Institution, Wiring, Device FROM "+self.metadata+";"
+        cmd = "SELECT item, type FROM "+self.metadata+" "+tests+";"
         cursor.execute(cmd)
         data = cursor.fetchall()
         conn.close()

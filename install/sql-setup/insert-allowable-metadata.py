@@ -12,9 +12,9 @@ conn = MySQLdb.connect(
     db=db)
 cursor=conn.cursor()
 
-com = "CREATE TABLE IF NOT EXISTS check_metadata (Expected_Values VARCHAR(30), Institution VARCHAR(40), Wiring VARCHAR(40), Device VARCHAR(40));"
+com = "CREATE TABLE IF NOT EXISTS metadata (item VARCHAR(50), type VARCHAR(50));"
 cursor.execute(com)
-com = "INSERT INTO check_metadata (Expected_Values, Institution, Wiring, Device) VALUES ('slac_expected_values', 'UC Berkeley', 'sample wire', 'sample dev');"
+com = "INSERT INTO metadata (item, type) VALUES ('slac_expected_values', 'expected_value'), ('UC Berkeley', 'institution'), ('slac_channel_naming','channel_naming'), ('device test', 'device'), ('wiring test', 'wiring');"
 cursor.execute(com)
 conn.commit()
 conn.close()
