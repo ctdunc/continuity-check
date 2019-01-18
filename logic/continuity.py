@@ -37,6 +37,7 @@ def perform_check(expected_values,channel_naming,dmm_ip=''):
     tests = np.array(tests)
 
     #split tests into arrays of disconnected and connected tests
+    print(tests)
     tests_disconnect = tests[np.where(tests[:,4]=='0')]
     tests_connect = tests[np.where(tests[:,4]=='1')]
    
@@ -74,11 +75,12 @@ def parallell_disconnect(s1,rows,dmm):
     s1_second = rows[np.where(rows[:,8]==s1)]
     s2_list = np.hstack([s1_first[:,8],s1_second[:,7]])
     minima = rows[:,5]
-    mini = max([float(i) for i in minima.flatten()])
+    mini = min([float(i) for i in minima.flatten()])
     
     #perform check
     # measurement = dmm.test_parallell(s1,s2_list)
     measurement = 0
+    success = 0
     if measurement > mini:
         success = 1
         return_rows = [np.hstack([r,[success,measurement]]) for r in rows]
@@ -87,13 +89,14 @@ def parallell_disconnect(s1,rows,dmm):
     else:
        rows_split = np.array_split(rows,2)
        for c in rows_split:
+           success = 0
            if len(c)>1:
                yield from parallell_disconnect(s1,c,dmm)
            elif len(c)==1:
                c = c[0]
                #measurement = dmm.test_individual(c[7],c[8])
                measurement = rand.uniform(mini-10000,mini+10000)
-               success = 0
+               print(mini,measurement)
                if mini < measurement:
                    success = 1
                return_row = np.hstack([c,[success,measurement]])

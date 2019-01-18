@@ -2,6 +2,18 @@ import React, { Component } from 'react';
 import ConfigContainer from './ConfigContainer';
 
 var $ = require('jquery');
+
+const expectedColumns = [
+	{Header:"Signal 1", accessor:'0'},
+	{Header:"Channel 1",accessor:'1'},	
+	{Header:"Signal 2 ",accessor:'2'},	
+	{Header:"Channel 2",accessor:'3'},	
+	{Header:"Expected Continuity",accessor:'4'},	
+	{Header:"Minimum",accessor:'5'},	
+	{Header:"Maximum",accessor:'6'}
+]
+
+
 export default class ConfigMenu extends Component{
 	constructor(props,context){
 		super(props,context);
@@ -25,7 +37,9 @@ export default class ConfigMenu extends Component{
 		return(
 			<details className='l-2' key={name}>
 				<summary>{name}</summary>
-					<ConfigContainer tableName={name} className='config-container'/>
+					<ConfigContainer tableName={name} 
+					columns={expectedColumns}
+					className='config-container'/>
 			</details>
 			);
 	}		

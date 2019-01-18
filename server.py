@@ -12,14 +12,15 @@ from logic.continuity import perform_check
 findint = re.compile('\d')
 betweenbrackets = re.compile('\[(.*?)\]')
 findhyphen = re.compile('[^-]*')
-db = sqlclient('localhost',
-        'continuity_check',
-        'cdms',
-        'cdms',
-        'continuity_history',
-        'channel_naming',
-        'slac_expected_values',
-        'metadata')
+db = sqlclient(host='localhost',
+        db='continuity_check',
+        user='cdms',
+        pw='cdms',
+        history='run_history',
+        data='run_data',
+        naming='channel_naming',
+        expected='expected_values'
+        )
 
 app = Flask(__name__, static_folder="./view/dist", template_folder="./view")
 
@@ -56,12 +57,12 @@ def index():
 
 @app.route("/continuity-history/<run>",methods=['GET'])
 def getRun(run):
-    data = db.get_run(run)
+    data = db.fetch_run(run)
     return jsonify(data)
 
 @app.route("/continuity-history",methods=['GET'])
 def getHistory():
-    data = db.get_history()
+    data = db.fetch_run_history()
     return jsonify(data)
 
 
@@ -73,8 +74,9 @@ def startcheck():
     tests = request.form.getlist('continuity[]')
     signal_g = lambda x,s: s[x[0]:x[1]]
     signals = [signal_g(findhyphen.search(i).span(),i) for i in signals]
-    print(signals)
-    #metadata has a nested structure, so I need to do some fancy regex searching to get key-value pairs out of URLEncoded data
+
+    # metadata has a nested structure, so I need to do some fancy regex 
+    # searching to get key-value pairs out of URLEncoded data
     meta_keys = [k for k in request.form.to_dict().keys() if k.startswith('metadata')]
     metadata = {}
     for k in meta_keys:
@@ -84,7 +86,7 @@ def startcheck():
     tablename = db.create_run_table(institution=metadata['institution'],
             wiring=metadata['wiring'],
             device=metadata['device'],
-            validation_table=metadata['expected'])
+            validation_table=metadata['expected_value'])
 
     # format Channel Layout
     channelGrouper = lambda c: [c[findint.search(c).span()[0]:],c[:findint.search(c).span()[0]-1]]
@@ -101,7 +103,6 @@ def startcheck():
     signal_types_dummy = {}
     for t, sig in groupby(signal_types, lambda x: x[1]):
         for s in sig:
-            print(s[0],s[1])
             if s[0] in signals:
                 signal_types_dummy.setdefault(s[1], []).append(s[0])
     signal_keys = list(filter(lambda k: k in channels.keys(),signal_types_dummy.keys()))
@@ -119,19 +120,22 @@ def startcheck():
     test_command = ' WHERE ('
     for k in signal_keys:
         c = channels[k]
+        c.append(-1)
         cstr = '('+','.join([str(x) for x in c])+')'
         s = signal_types[k]
         for signal in s:
-            signal_selector = '((Signal_1 = \"'+signal+'\"  OR (Signal_2 = \"'+signal+'\")) AND (Channel_1 IN '+cstr+' AND Channel_2 IN '+cstr+')) OR'
+            signal_selector = ('((Signal_1 = \"'+signal+'\" OR Signal_2 = \"'+
+                signal+'\") AND (Channel_1 IN '+cstr+' AND Channel_2 IN '
+                +cstr+')) OR ')
             matrix_selector = '(Signal_name = \"'+signal+'\" AND Channel IN '+cstr+') OR'
             test_command += signal_selector
 
     #[:-2] gets rid of the final OR statement on the SQL command
-    test_command = test_command[:-2]+') AND ('+continuity_command+')'
+    print(test_command)
+    test_command = test_command[:-3]+') AND '+continuity_command
     print(test_command)
     expected_values = db.get_expected_value(tests=test_command)
     matrix_values = db.get_channel_naming() 
-
     task = continuity_check.delay(url_for('checkupdate',_external=True),
             expected_values=expected_values,
             channel_naming=matrix_values,
@@ -146,7 +150,6 @@ def checkupdate():
     key  = data.get('key')
     value = data.get('value')
     tablename = data.get('tablename')
-    
     if isinstance(value[0],list):
         for i in value:
             db.insert_run_row(tablename,i)
@@ -156,33 +159,30 @@ def checkupdate():
     socketio.emit('checkUpdate',data)
     return '0'
 
-     
-@app.route("/channel-layout", methods=['GET'])
-def return_channel_layout():
-    n = sorted(db.get_channel_layout(), key=lambda tup: tup[0])
+@app.route("/channel-layout/<namingkey>", methods=['GET'])
+def return_channel_layout(namingkey):
+    n = db.fetch_naming([namingkey])[namingkey]
+    
+    n = sorted(n, key=lambda tup: tup[-1])
     channel_layout = {}
-    for key, group in groupby(n, lambda x: x[0]):
+    for key, group in groupby(n, lambda x: x[-1]):
         chan_num = -2 
         siglist = []
         for signal in group: 
-            if signal[2] not in siglist:
-                siglist.append(signal[2])
-            if signal[1] > chan_num:
-                chan_num = signal[1]
-        channel_layout[key]={'channels':chan_num, 'signals':siglist}
+            channel = signal[4]
+            if signal[3] not in siglist:
+                siglist.append(signal[3])
+            if channel > chan_num:
+                chan_num = channel 
+        channel_layout[key]={'channels':chan_num,'signals':siglist}
     return jsonify(channel_layout)
 
-@app.route("/allowable-metadata",methods=['GET'])
-def return_metadata():
-    metadata = db.get_allowable_metadata()
-    n = sorted(metadata, key=lambda tup:tup[1])
-    result = {}
-    for key, elements in groupby(n, lambda n: n[1]):
-        result[key] = []
-        for e in elements:
-            result[key].append(e[0])
-    print(result)
-    return jsonify(result)
+
+@app.route("/run-opts", methods=['GET'])
+def return_opts():
+    opts = db.fetch_run_opts()
+    print(opts)
+    return(jsonify(opts))
 
 if __name__ == "__main__":
     socketio.run(app,debug=True)

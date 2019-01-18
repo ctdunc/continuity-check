@@ -68,6 +68,7 @@ class DataDisplay extends Component{
 	getRuns(){
 		$.get(window.location.href+'continuity-history', 
 			(data) =>{
+				console.log(data);
 				this.displayRuns(data);
 			}
 		);

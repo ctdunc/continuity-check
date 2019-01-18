@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
 
-const selectinputs = {'expected_value':'Expected Values', 'institution':'Institution', 'wiring':'Wiring', 'vib':'VIB', 'device':'Device', 'channel_naming':'Channel Naming'}
+const selectinputs = {'expected':'Expected Values', 'institution':'Institution', 'wiring':'Wiring', 'vib':'VIB', 'device':'Device', 'channel_naming':'Channel Naming'}
 
 export default class StartMetadata extends Component {
 	constructor(props,context){

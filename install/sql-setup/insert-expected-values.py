@@ -18,7 +18,7 @@ expected_result = np.genfromtxt(
             ]
         )
 ex = """ CREATE TABLE IF NOT EXISTS
-    slac_expected_values (Signal_1 VARCHAR(20), Channel_1 INT,  Signal_2 VARCHAR(20),Channel_2 INT, Expected_Continuity BOOL, Minimum FLOAT(8), Maximum FLOAT(8));"""
+    expected_values (Signal_1 VARCHAR(255), Channel_1 INT,  Signal_2 VARCHAR(255),Channel_2 INT, Expected_Continuity BOOL, Minimum FLOAT(8), Maximum FLOAT(8), Naming_key VARCHAR(255), Expected_key VARCHAR(255));"""
 cursor.execute(ex)
 endint = re.compile('\d')
 def n_ret(r):
@@ -33,8 +33,8 @@ def n_ret(r):
     
 
 for r in expected_result:
-    format_str="""INSERT INTO slac_expected_values (Signal_1, Channel_1, Signal_2, Channel_2, Expected_Continuity, Minimum, Maximum)
-        VALUES ("{sig1}","{ch1}","{sig2}","{ch2}","{exp_cont}","{min}","{max}");"""
+    format_str="""INSERT INTO expected_values (Signal_1, Channel_1, Signal_2, Channel_2, Expected_Continuity, Minimum, Maximum, Naming_key, Expected_key)
+        VALUES ("{sig1}","{ch1}","{sig2}","{ch2}","{exp_cont}","{min}","{max}","sample_naming","sample_expected");"""
     if r[2].startswith('Dis'):
         r[2]=0
     else: 

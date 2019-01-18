@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-
+import ReactTable from 'react-table';
 export default class ConfigContainer extends Component{
 	constructor(props, context){
 		super(props,context);
 	}
+	
 
 	render(){
 		/* TODO:
@@ -13,7 +14,9 @@ export default class ConfigContainer extends Component{
 		 */
 		return(
 			<div className='config-container'>
-				<h1> {this.props.tableName} </h1>
+				<ReactTable 
+					columns={this.props.columns}
+					/>
 			</div>
 			);
 	}

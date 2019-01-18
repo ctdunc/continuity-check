@@ -2,40 +2,24 @@ import MySQLdb
 import string
 import random
 import datetime
+from itertools import groupby
 
 # define convenient and repeated commands
 tabne = 'CREATE TABLE IF NOT EXISTS ' # tabne short for TABle Not Exists
 
 class sqlclient:
-    def __init__(self, host, db, user, pw, history, naming, expected,metadata):
+    def __init__(self, host = '', history='', naming='', expected='', data='',
+            user='', pw='',  db=''):
         self.run_history = history
+        self.run_data = data
         self.channel_naming = naming
         self.expected_values = expected
-        self.metadata = metadata
         self.host = host
         self.user = user
         self.pw = pw
         self.db = db
-        # make sure run history exists (channel_naming and expected_vals
-        # require more in-depth setup)
-
-        conn = self.__connect()
-        cursor = conn.cursor()
-        
-        command = (tabne + history +' (Date DATETIME, \
-                Institution VARCHAR(20), \
-                Vib VARCHAR(10), \
-                Device VARCHAR(10), \
-                Wiring VARCHAR(10), \
-                Device VARCHAR(20), \
-                Temperature FLOAT(8), \
-                Validator VARCHAR(10), \
-                CheckName VARCHAR(10));'
-                )
-
-        cursor.execute(command)
-        conn.close()
-
+          
+     
     def __connect(self):
         try:
             connection = MySQLdb.connect(host=self.host,
@@ -46,211 +30,163 @@ class sqlclient:
         except Exception as e:
             return ('Error in sqlclient.connect! '+str(e))
 
-    def get_channel_layout(self):
-        conn =  self.__connect()
-        cursor = conn.cursor()
-        command = "SELECT DISTINCT Type, Channel, Signal_name FROM " +self.channel_naming+";"
-        cursor.execute(command)
-        types = cursor.fetchall()
-
-        conn.close()
-        return types
-
-    def get_history(self):
-        conn = self.__connect()
-        cursor = conn.cursor()
-
-        cmd = """ SELECT Date,
-            Institution,
-            Vib,
-            Wiring,
-            Device,
-            Temperature,
-            Validator,
-            CheckName FROM 
-            """
-        exe = cmd + self.run_history
-        cursor.execute(exe)
-
-        data = cursor.fetchall()
-        conn.close()
-        return data
-
-    def get_run(self, run): 
-        conn = self.__connect()
-        cursor = conn.cursor()
-        cmd = """ SELECT
-            Signal_1,
-            Channel_1,
-            Signal_2,
-            Channel_2,
-            Minimum,
-            Maximum,
-            Measured,
-            Unit,
-            Pass FROM 
-            """
-        ex = cmd + run
-        cursor.execute(ex)
-
-        data = cursor.fetchall()
-        conn.close()
-        return(data)
+    def commit_run(self, institution='', vib='', wiring='', temperature=0, 
+            expected_key='', naming_key=''):
+        connection = self.__connect()
+        cursor = connection.cursor()
         
-    def get_expected_value(self, tests=''):
-        conn = self.__connect()
-        cursor = conn.cursor()
-        cmd = """ SELECT
-                Signal_1,
-                Channel_1,
-                Signal_2,
-                Channel_2,
-                Expected_Continuity,
-                Minimum,
-                Maximum FROM 
-                """
-        ex = cmd + self.expected_values+tests+';'
-        cursor.execute(ex)
-
-        data = cursor.fetchall()
-        conn.close()
-        return data
-                
-    def get_channel_naming(self):
-        conn = self.__connect()
-        cursor = conn.cursor()
-
-        cmd = "\
-            SELECT Matrix_location, \
-            DB_78_pin, \
-            VIB_pin, \
-            Signal_name, \
-            Channel, \
-            Type \
-            FROM \
-            " + self.channel_naming+ ";"
-        cursor.execute(cmd)
-        data=cursor.fetchall()
-        conn.close()
-        return data       
-
-    def create_run_table(self,
-            institution='',
-            vib='',
-            wiring='',
-            device='',
-            temp=0,
-            validation_table=''):
-        conn = self.__connect()
-        cursor = conn.cursor()
-        
-        # Generate unique table ID
+        # generate unique 10-char key for run
         chars = string.ascii_letters
-        gname = lambda n, func:(
-                   n if not (
-                       cursor.execute("SHOW TABLES LIKE \'"+n+"\';")
-                       )
-                   else func(chars)
-                )
-        n = lambda c: "".join((random.choice(c) for x in range(10)))
-        name = gname(n(chars), n)
-        
-        # create table
-        cmd = """
-            CREATE TABLE IF NOT EXISTS
-            {name} (
-            Signal_1 VARCHAR(20),
-            Channel_1 INT,
-            Signal_2 VARCHAR(20),
-            Channel_2 INT,
-            Minimum FLOAT(8),
-            Maximum FLOAT(8),
-            Measured FLOAT(8),
-            Unit VARCHAR(10),
-            Pass INT);
-        """
-        cmd = cmd.format(name=name)
-        cursor.execute(cmd)
 
-        # log table creation
-        cmd = ("INSERT INTO "+self.run_history+" ( \
-            CheckName, \
-            Institution, \
-            Vib, \
-            Device, \
-            Temperature, \
-            Validator, \
-            Date) \
-            VALUES ( \
-            \"{check}\", \
-            \"{inst}\", \
-            \"{vib}\", \
-            \"{dev}\", \
-            {temp}, \
-            \"{val}\", \
-            \"{date}\" \
-                );").format(check=name,
-                        inst=institution,
-                        vib=vib,
-                        dev=device,
-                        temp=temp,
-                        val=validation_table,
-                        date=datetime.datetime.now().strftime('%Y-%m-%d %x'))
-        cursor.execute(cmd)
-        conn.commit()
-        conn.close()
-        return name
+        newname = lambda n, func:(
+                n if not(
+                    cursor.execute("SHOW TABLES LIKE \""+n+"\";")
+                    )
+                else func(chars)
+                    )
+        ten_rand = lambda c: "".join(random.choice(c) for x in range(10))
+        run_key = newname(ten_rand(chars), ten_rand)
 
-    def insert_run_row(self, tablename, value):
-        conn = self.__connect()
-        cursor = conn.cursor()
-        cmd = """
-            INSERT INTO
-                {table} (
-                Signal_1,
-                Channel_1,
-                Signal_2,
-                Channel_2,
-                Minimum,
-                Maximum,
-                Measured,
-                Unit,
-                Pass) 
-            VALUES (
-               \"{s1}\",
-               \"{c1}\",
-               \"{s2}\",
-               \"{c2}\",
-                {mi},
-                {ma},
-                {me},
-                \"{u}\",
-                {p});
-                """
-        cmd = cmd.format(
-                table=tablename,
-                s1=value[0],
-                c1=value[1],
-                s2=value[2],
-                c2=value[3],
-                mi=float(value[5]),
-                ma=float(value[6]),
-                me=float(value[10]),
-                p=bool(value[9]),
-                u='Ohm'
+        # commit to run history table
+        log_command = ("INSERT INTO "+self.run_history+" (\
+                Run_key, Expected_key, Naming_key, Institution, VIB, Device, Temperature, Date)\
+                VALUES (\"{check}\", \"{ekey}\", \"{nkey}\",\"{inst}\", \
+                    \"{vib}\", \"{dev}\", {temp}, \"{date}\" );")
+        log_command=log_command.format(
+                check=run_key,
+                ekey=expected_key,
+                nkey=naming_key,
+                inst=institution,
+                vib=vib,
+                dev=device,
+                temp=temperature,
+                date=datetime.datetime.now().strftime('%Y-%m-%d %x')
                 )
-        print(value[10])
-        cursor.execute(cmd)
-        conn.commit()
-        conn.close()
+        cursor.execute(log_command)
+
+        connection.close()
+        return 0
+    def commit_run_row(self, runkey, data):
+        connection = self.__connect()
+        cursor = connection.cursor()
+
+        connection.close()
+        return 0
+    def commit_expected(self):
+        connection = self.__connect()
+        cursor = connection.cursor()
+
+        connection.close()
         return 0
 
-    def get_allowable_metadata(self,tests=""):
-        conn = self.__connect()
-        cursor = conn.cursor()
-        cmd = "SELECT item, type FROM "+self.metadata+" "+tests+";"
-        cursor.execute(cmd)
-        data = cursor.fetchall()
-        conn.close()
-        return data
+    def commit_naming(self):
+        connection = self.__connect()
+        cursor = connection.cursor()
 
+        connection.close()   
+        return 0
+
+    def fetch_run_history(self):
+        connection = self.__connect()
+        cursor = connection.cursor()
+        cmd = ("SELECT Date, Institution, VIB, Wiring, Device, Temperature, \
+                Run_key FROM "+self.run_history+";")
+        cursor.execute(cmd)
+        result = cursor.fetchall()
+        connection.close()       
+        return result 
+
+    def fetch_run(self,runname):
+        connection = self.__connect()
+        cursor = connection.cursor()
+        
+        cmd = ("SELECT Signal_1, Channel_1, Signal_2, Channel_2, \
+                Minimum, Maximum, Measured, Unit, Pass FROM "
+                +self.run_data+" WHERE Run_key=\""+runname+"\";")
+        cursor.execute(cmd)
+        run = cursor.fetchall()
+
+        connection.close()
+        return run
+    
+    def fetch_expected(self,expectedname=[]):
+        connection = self.__connect()
+        cursor = connection.cursor()
+
+        result = {}
+        if expectedname:
+            for name in expectedname:
+                cmd = ("SELECT Signal_1, Channel_1, Signal_2, Channel_2, \
+                        Expected_Continuity, Minimum, Maximum, Naming_key FROM "
+                    +self.expected_values+" WHERE Expected_key=\""+name+"\";")
+                cursor.execute(cmd)
+                expected=cursor.fetchall()
+                
+                result[name]=layout
+        else:
+            cmd = "SELECT Signal_1, Channel_1, Signal_2, Channel_2, \
+                    Expected_Continuity, Minimum, Maximum, Naming_key, \
+                    Expected_key FROM "+self.expected_values+";"
+            cursor.execute(cmd)
+            tosort=cursor.fetchall()
+            expectedname = groupby(tosort, lambda x: x[8])
+            for name, expected in expectedname:
+                result[name]=[i[:8] for i in expected]
+        
+        connection.close()
+        return result
+
+    def fetch_naming(self,layoutname=[]):
+        connection = self.__connect()
+        cursor = connection.cursor()
+
+        result = {}
+        if layoutname:
+            # gets only requested layouts and returns as dict
+            for name in layoutname:
+                cmd = ("SELECT Matrix_location, DB_78_pin, VIB_pin, Signal_name,\
+                        Channel, Type FROM "+self.channel_naming+
+                        " WHERE Naming_key=\""+name+"\";")
+                cursor.execute(cmd)
+                layout = cursor.fetchall()
+                result[name]=layout
+        else:
+            # return all elements
+            cmd = "SELECT Matrix_location, DB_78_pin, VIB_pin, Signal_name, \
+                    Channel, Type, Naming_key FROM "+self.channel_naming+";"
+            cursor.execute(cmd)
+            tosort = cursor.fetchall()
+            layoutname = groupby(tosort, lambda x: x[6])
+            for name, layout in layoutname:
+                result[name]=[i for i in layout]
+        connection.close()
+        return result 
+    
+    def fetch_run_opts(self):
+        connection=self.__connect()
+        cursor = connection.cursor()
+        result = {}
+        expected_cmd = ("SELECT DISTINCT Expected_key FROM "
+                +self.expected_values+";")
+        etc_cmd = ("SELECT DISTINCT Institution, Wiring, Device FROM "
+                +self.run_history+";")
+        cursor.execute(expected_cmd)
+        expected_tabs = cursor.fetchall()
+        
+        inst,wire,dev = [],[],[]
+        try:
+            cursor.execute(etc_cmd)
+            etc = cursor.fetchall()
+            sortetc =  lambda x: x[0],x[1],x[2]
+            for i,w,d in sortetc(etc):
+                inst.append(i)
+                wire.append(w)
+                dev.append(d)
+        except:
+            pass
+        result['expected']=[i for i in expected_tabs]
+        result['institution']=inst
+        result['wiring']=wire
+        result['device']=dev
+         
+        return result

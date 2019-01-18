@@ -21,15 +21,16 @@ conn = MySQLdb.connect(
 cursor=conn.cursor()
 
 inect = """
-CREATE TABLE IF NOT EXISTS channel_naming (Matrix_location VARCHAR(5), DB_78_pin VARCHAR(5), VIB_pin VARCHAR(5), Signal_name VARCHAR(20), Channel int, Type VARCHAR(10));
+CREATE TABLE IF NOT EXISTS channel_naming (Matrix_location VARCHAR(20), DB_78_pin VARCHAR(20), VIB_pin VARCHAR(20), Signal_name VARCHAR(255), Channel INT, Type VARCHAR(255), Naming_key VARCHAR(255));
 """
 cursor.execute(inect)
+
 endint = re.compile('\d')
 for index,row in data.iterrows():
     str_input = """INSERT INTO channel_naming
-    (Matrix_location, DB_78_pin, VIB_pin, Signal_name, Channel,Type)
+    (Matrix_location, DB_78_pin, VIB_pin, Signal_name, Channel,Type, Naming_Key)
     VALUES
-        ("{matr}", "{dpin}", "{vibpin}", "{sign}", "{chan}", "{t}");
+        ("{matr}", "{dpin}", "{vibpin}", "{sign}", "{chan}", "{t}", "sample_naming");
     """
 
 

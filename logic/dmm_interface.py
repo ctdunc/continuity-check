@@ -2,7 +2,7 @@ import telnetlib
 
 class dmm_interface:
 
-    def __init__(self,host='192.168.006.120'):
+    def __init__(self,host='192.168.5.120'):
        self.host = host
 
        self.tn=telnetlib.Telnet(host)

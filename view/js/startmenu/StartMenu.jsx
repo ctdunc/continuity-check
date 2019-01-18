@@ -40,9 +40,9 @@ export default class StartMenu extends Component {
 			}
 		}
 	}
-	
+	//TODO: add change of layout on change of channel naming option	
 	componentDidMount(){
-		$.get(window.location.href+'channel-layout', (data) => {
+		$.get(window.location.href+'channel-layout/sample_naming', (data) => {
 			var cs = this.state
 	
 			for(var type in data){
@@ -57,7 +57,7 @@ export default class StartMenu extends Component {
 				});
 			}
 			});
-		$.get(window.location.href+'allowable-metadata', (data) =>{
+		$.get(window.location.href+'run-opts', (data) =>{
 			var keys = Object.keys(data);
 			var vals = {}
 			keys.map((key) => {vals[key]=data[key][0]})
