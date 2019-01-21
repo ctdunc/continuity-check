@@ -1,15 +1,14 @@
-import React, { Component } from 'react';
-
-import DisplayManager from './DisplayManager';
+import React, { Component } from "react";
 import ProgressBar from './ProgressBar';
+import DisplayManager from './DisplayManager'
 
 
-import '../css/App.css';
+import "../css/App.css";
 
 export default class ContinuityApp extends Component{
 	constructor(props,context){
 		super(props,context);
-		this.state = {show: 'datadisplay'}
+		this.state = {show: "datadisplay"};
 		this.show=this.show.bind(this);	
 
 	}
@@ -22,9 +21,9 @@ export default class ContinuityApp extends Component{
 			<div className="flex-container">
 				<div className="header">
 					<div className="top-50">
-						<button onClick={this.show.bind(this,'startmenu')}>Start Check</button>
-						<button onClick={this.show.bind(this,'datadisplay')}>View Data</button>
-						<button onClick={this.show.bind(this,'config')}>Configuration</button>
+						<button onClick={this.show.bind(this,"startmenu")}>Start Check</button>
+						<button onClick={this.show.bind(this,"datadisplay")}>View Data</button>
+						<button onClick={this.show.bind(this,"config")}>Configuration</button>
 					</div>
 					<div className="bottom-50">
 						<ProgressBar />
