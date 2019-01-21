@@ -25,9 +25,11 @@ export default class StartMenu extends Component {
 			continuity:[],
 			metadata:{
 				device:[],
-				inst:[],
-				expected:[],
-				wiring:[]
+				institution:[],
+				expected_key:[],
+				naming_key:[],
+				wiring:[],
+				vib:[]
 			},
 			selected:{
 				channels:[],

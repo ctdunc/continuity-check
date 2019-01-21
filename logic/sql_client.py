@@ -30,8 +30,7 @@ class sqlclient:
         except Exception as e:
             return ('Error in sqlclient.connect! '+str(e))
 
-    def commit_run(self, institution='', vib='', wiring='', temperature=0, 
-            expected_key='', naming_key=''):
+    def commit_run(self, metadata):
         connection = self.__connect()
         cursor = connection.cursor()
         
@@ -168,25 +167,32 @@ class sqlclient:
         result = {}
         expected_cmd = ("SELECT DISTINCT Expected_key FROM "
                 +self.expected_values+";")
-        etc_cmd = ("SELECT DISTINCT Institution, Wiring, Device FROM "
+        naming_cmd = ("SELECT DISTINCT Naming_key FROM "
+                +self.channel_naming+";")
+        etc_cmd = ("SELECT DISTINCT Institution, Wiring, Device, VIB FROM "
                 +self.run_history+";")
         cursor.execute(expected_cmd)
         expected_tabs = cursor.fetchall()
         
-        inst,wire,dev = [],[],[]
+        cursor.execute(naming_cmd)
+        naming_tabs = cursor.fetchall()
+        inst,wire,dev,vib= [],[],[],[]
         try:
             cursor.execute(etc_cmd)
             etc = cursor.fetchall()
-            sortetc =  lambda x: x[0],x[1],x[2]
-            for i,w,d in sortetc(etc):
+            sortetc =  lambda x: x[0],x[1],x[2],x[3]
+            for i,w,d,n in sortetc(etc):
                 inst.append(i)
                 wire.append(w)
                 dev.append(d)
+                vib.append(n)
         except:
             pass
-        result['expected']=[i for i in expected_tabs]
+        result['expected_key']=[i for i in expected_tabs]
+        result['naming_key']=[i for i in naming_tabs]
         result['institution']=inst
         result['wiring']=wire
         result['device']=dev
+        result['vib']=vib
          
         return result

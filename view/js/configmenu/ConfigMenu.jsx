@@ -12,33 +12,45 @@ const expectedColumns = [
 	{Header:"Minimum",accessor:'5'},	
 	{Header:"Maximum",accessor:'6'}
 ]
-
+const namingColumns = [
+	{Header:"Matrix Location", accessor:'0'},
+	{Header:"DB 78 pin", accessor:'1'},
+	{Header:"VIB pin", accessor:'2'},
+	{Header:"Signal", accessor:'3'},
+	{Header:"Channel",accessor:'4'},	
+	{Header:"Type",accessor:'5'},	
+]
 
 export default class ConfigMenu extends Component{
 	constructor(props,context){
 		super(props,context);
 		this.state = {
-			expectedTables:[],
-			channelNaming:[]
+			expected:{},
+			naming:{}
 		}
 		this.createItem = this.createItem.bind(this);
 	}
 	componentDidMount(){
-		$.get(window.location.href+'/allowable-metadata', (data) =>{
-			var e = data.expected_value;
-			var c = data.channel_naming;
+		$.get(window.location.href+'/expected-value', (data) => {
 			this.setState({
-				expectedTables:e,
-				channelNaming:c
-			});
+				expected:data
+			})
+		});
+		$.get(window.location.href+'/channel-layout/all', (data)=> {
+			console.log(data)
+			this.setState({
+				naming:data
+			})
 		});
 	}
-	createItem(name){
+
+	createItem(key,table,columns){
 		return(
-			<details className='l-2' key={name}>
-				<summary>{name}</summary>
-					<ConfigContainer tableName={name} 
-					columns={expectedColumns}
+			<details className='l-2' key={key}>
+				<summary>{key}</summary>
+					<ConfigContainer tableName={key} 
+					columns={columns}
+					entries={table}
 					className='config-container'/>
 			</details>
 			);
@@ -49,11 +61,27 @@ export default class ConfigMenu extends Component{
 			<div className="config-menu">
 				<details className='l-1'>
 					<summary>Expected Values</summary>
-					{this.state.expectedTables.map(tab => {return(this.createItem(tab))})}
+					{Object.keys(this.state.expected).map(key => {
+						return(
+							this.createItem(
+								key,
+								this.state.expected[key],
+								expectedColumns
+							)
+						)
+					})}
 				</details>
 				<details className='l-1'>
 					<summary>Channel Layout</summary>
-					{this.state.channelNaming.map(c =>{return(this.createItem(c))})}
+					{Object.keys(this.state.naming).map(key => {
+						return(
+							this.createItem(
+								key,
+								this.state.naming[key],
+								namingColumns
+							)
+						)
+					})}
 				</details>
 			</div>
 			);

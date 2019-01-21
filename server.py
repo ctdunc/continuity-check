@@ -45,9 +45,15 @@ def continuity_check(self,url,tablename,expected_values, channel_naming, dmm_ip=
         checks_complete += n 
 
         # posts to webpage for live update on check
-        post(url,json={'key':key, 'value':value, 'complete':checks_complete/number_checks,'tablename':tablename})
+        post(
+                url,json={
+                    'key':key, 
+                    'value':value, 
+                    'complete':checks_complete/number_checks,
+                    'tablename':tablename
+                    }
+                )
         time.sleep(0.05)
-
     return 0 
 
 
@@ -82,11 +88,9 @@ def startcheck():
     for k in meta_keys:
         sp = betweenbrackets.search(k).span()
         metadata[k[sp[0]+1:sp[1]-1]] = request.form.getlist(k)[0]
-    # create table in database, return name of table to pass to worker
-    tablename = db.create_run_table(institution=metadata['institution'],
-            wiring=metadata['wiring'],
-            device=metadata['device'],
-            validation_table=metadata['expected_value'])
+
+    print(metadata)    
+    db.commit_run(metadata)
 
     # format Channel Layout
     channelGrouper = lambda c: [c[findint.search(c).span()[0]:],c[:findint.search(c).span()[0]-1]]
@@ -150,6 +154,7 @@ def checkupdate():
     key  = data.get('key')
     value = data.get('value')
     tablename = data.get('tablename')
+    # (tablename==runkey)=true, I just didn't rename things after rewrite
     if isinstance(value[0],list):
         for i in value:
             db.insert_run_row(tablename,i)
@@ -161,27 +166,34 @@ def checkupdate():
 
 @app.route("/channel-layout/<namingkey>", methods=['GET'])
 def return_channel_layout(namingkey):
-    n = db.fetch_naming([namingkey])[namingkey]
-    
-    n = sorted(n, key=lambda tup: tup[-1])
-    channel_layout = {}
-    for key, group in groupby(n, lambda x: x[-1]):
-        chan_num = -2 
-        siglist = []
-        for signal in group: 
-            channel = signal[4]
-            if signal[3] not in siglist:
-                siglist.append(signal[3])
-            if channel > chan_num:
-                chan_num = channel 
-        channel_layout[key]={'channels':chan_num,'signals':siglist}
+    if namingkey=='all':
+        channel_layout=db.fetch_naming()
+    else:
+        n = db.fetch_naming([namingkey])[namingkey]
+        
+        n = sorted(n, key=lambda tup: tup[-1])
+        channel_layout = {}
+        for key, group in groupby(n, lambda x: x[-1]):
+            chan_num = -2 
+            siglist = []
+            for signal in group: 
+                channel = signal[4]
+                if signal[3] not in siglist:
+                    siglist.append(signal[3])
+                if channel > chan_num:
+                    chan_num = channel 
+            channel_layout[key]={'channels':chan_num,'signals':siglist}
     return jsonify(channel_layout)
 
+@app.route("/expected-value",methods=['GET'])
+def return_expected_values():
+    expected = db.fetch_expected()
+
+    return(jsonify(expected))
 
 @app.route("/run-opts", methods=['GET'])
 def return_opts():
     opts = db.fetch_run_opts()
-    print(opts)
     return(jsonify(opts))
 
 if __name__ == "__main__":

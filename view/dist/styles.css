@@ -107,6 +107,14 @@ body{
 	float:right;
 	width:75%;
 }
+.col-75>button{
+	float:right;
+	width:7%;
+}
+.extend{
+	float:left;
+	width:93%;
+}
 .row{
 	width:100%;
 }
