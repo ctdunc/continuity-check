@@ -51,6 +51,8 @@ class SelectOrEnter extends Component{
 	}
 
 	render(){
+		// remove duplicate values
+		var filteredOpts = Array.from(new Set(this.props.options));
 		if(this.state.display){
 			return(
 				<div key={this.props.name} className="row">
@@ -61,7 +63,7 @@ class SelectOrEnter extends Component{
 						<select name={this.props.name} 
 							onChange={this.props.callback.bind(this, this.props.name)}
 							className="extend">
-							{this.props.options.map(this.renderOpt)}
+							{filteredOpts.map(this.renderOpt)}
 						</select>
 						<button name={'switch'+this.props.name} onClick={this.toggleDisplay}>
 							+

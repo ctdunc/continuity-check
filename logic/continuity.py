@@ -17,6 +17,7 @@ def perform_check(expected_values,channel_naming,dmm_ip=''):
     expected_values=np.array(expected_values)
     yield_data = lambda key,value,n: {'key':key, 'value':value, 'rownum': n}
     channel_naming=np.array(channel_naming)
+    print(channel_naming)
     tests = []
     for r in range(len(expected_values)):
         row = expected_values[r]
@@ -37,10 +38,8 @@ def perform_check(expected_values,channel_naming,dmm_ip=''):
     tests = np.array(tests)
 
     #split tests into arrays of disconnected and connected tests
-    print(tests)
     tests_disconnect = tests[np.where(tests[:,4]=='0')]
     tests_connect = tests[np.where(tests[:,4]=='1')]
-   
     # perform connected tests
     for row in tests_connect:
         #naming done below for code legibility
@@ -96,7 +95,7 @@ def parallell_disconnect(s1,rows,dmm):
                c = c[0]
                #measurement = dmm.test_individual(c[7],c[8])
                measurement = rand.uniform(mini-10000,mini+10000)
-               print(mini,measurement)
+               print([mini,measurement])
                if mini < measurement:
                    success = 1
                return_row = np.hstack([c,[success,measurement]])

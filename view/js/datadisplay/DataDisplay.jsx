@@ -11,8 +11,6 @@ const histCols = [
 	{Header:"Wiring",accessor:'3'},
 	{Header:"Device",accessor:'4'},
 	{Header:"Temperature",accessor:'5'},
-	{Header:"Validator",accessor:'6'},
-	{accessor: '7'}
 ]
 const checkCols = [
 	{Header: "Signal",
@@ -93,7 +91,7 @@ class DataDisplay extends Component{
 							height: "100%"
 						}}
 						SubComponent ={({row,nestingPath,toggleRowSubComponent}) => {
-							{this.getCheck(row[7])}
+							{this.getCheck(row[6])}
 						}}
 					/>
 				</div>
