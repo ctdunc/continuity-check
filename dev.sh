@@ -1,5 +1,5 @@
 source env/bin/activate
-nohup termite  --exec=redis-server & 
-nohup termite --directory=./view/ --exec='npm run watch' &
-termite --exec='python server.py' &
-termite --exec='celery worker -A server.celery' &
+nohup st --exec=redis-server & 
+nohup st --directory=./view/ --exec='npm run watch' &
+st --exec='python server.py' &
+st --exec='celery worker -A server.celery' &
