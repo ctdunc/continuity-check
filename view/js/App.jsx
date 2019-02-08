@@ -23,7 +23,7 @@ export default class ContinuityApp extends Component{
 					<div className="top-50">
 						<button onClick={this.show.bind(this,"startmenu")}>Start Check</button>
 						<button onClick={this.show.bind(this,"datadisplay")}>View Data</button>
-						<button onClick={this.show.bind(this,"config")}>Configuration</button>
+						<button disabled onClick={this.show.bind(this,"config")}>Configuration</button>
 					</div>
 					<div className="bottom-50">
 						<ProgressBar />
