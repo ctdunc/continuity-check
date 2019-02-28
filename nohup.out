@@ -1,8 +1,0 @@
-usage: st [-aiv] [-c class] [-f font] [-g geometry] [-n name] [-o file]
-          [-T title] [-t title] [-w windowid] [[-e] command [args ...]]
-       st [-aiv] [-c class] [-f font] [-g geometry] [-n name] [-o file]
-          [-T title] [-t title] [-w windowid] -l line [stty_args ...]
-usage: st [-aiv] [-c class] [-f font] [-g geometry] [-n name] [-o file]
-          [-T title] [-t title] [-w windowid] [[-e] command [args ...]]
-       st [-aiv] [-c class] [-f font] [-g geometry] [-n name] [-o file]
-          [-T title] [-t title] [-w windowid] -l line [stty_args ...]
