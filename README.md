@@ -54,13 +54,13 @@ The only exception is the .botconfig file, which allows you to change the name o
 
 The format is as follows
 
-`
+```
 [bot name]
 
 [bot pw]
 
 [db name]
-`
+```
 
 Also, the code currently executes a random measurement, as opposed to speaking to a DMM, since I do not have a real one on hand. So, if you need to take real measurements, edit `logic/continuity.py` so that every `rand.uniform()` call points to the appropriate function from the `dmm_interface` class. 
 
