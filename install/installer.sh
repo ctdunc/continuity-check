@@ -44,9 +44,9 @@ done
 echo 'passwords match! continuing...'
 
 echo >.botconfig
-echo "username:$bname">>.botconfig
-echo "password:$bpass">>.botconfig
-echo "database:$dbname">>.botconfig
+echo "$bname">>.botconfig
+echo "$bpass">>.botconfig
+echo "$dbname">>.botconfig
 
 echo 'creating bot account...'
 
@@ -69,5 +69,3 @@ echo 'data inserted!'
 fi
 
 echo 'complete!'
-
-

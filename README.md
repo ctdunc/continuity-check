@@ -45,7 +45,24 @@ Once you are finished with this script, you are ready to run the app. Simply sta
 
 To view the webpage, navigate to `127.0.0.1:5000/`.
 ### Apache Daemon
+Instructions coming soon...
 
+## Configuration
+So far, all configuration must either be done by directly editing SQL tables, or editing source directly. 
+
+The only exception is the .botconfig file, which allows you to change the name of the bot, as well as password, and the database you are using.
+
+The format is as follows
+
+`
+[bot name]
+[bot pw]
+[db name]
+`
+
+Also, the code currently executes a random measurement, as opposed to speaking to a DMM, since I do not have a real one on hand. So, if you need to take real measurements, edit `logic/continuity.py` so that every `rand.uniform()` call points to the appropriate function from the `dmm_interface` class. 
+
+This will be changed in a future release, once we are prepared to go beyond testing (there's an issue with the DMM preventing us from using it at low temperatures).
 ## Planned Improvements
 This is still a work in progress. While it is ready to be used as a logging service for our continuity check now, there are still several features that I would like to add.
 
