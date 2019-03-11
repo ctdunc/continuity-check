@@ -33,7 +33,7 @@ Now, activate the environment by running
 
 and make sure your dependencies are up to date, by running 
 
-`pip install -r install/py_deps.txt`
+`pip install -r install/python_deps.txt`
 
 With this procedure completed, you can run the `installer` script. MAKE SURE THAT YOU ARE IN THE `continuity-check` DIRECTORY. From this, run  
 
