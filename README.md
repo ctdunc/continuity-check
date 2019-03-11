@@ -56,7 +56,9 @@ The format is as follows
 
 `
 [bot name]
+
 [bot pw]
+
 [db name]
 `
 
