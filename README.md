@@ -43,6 +43,8 @@ This script will take you through a series of questions that creates an sql data
 
 Once you are finished with this script, you are ready to run the app. Simply start the celery worker with `celery worker -A server.celery`, make sure there is a running redis server on your computer, and execute `python server.py`.
 
+The redis server runs on `redis://localhost:6379/0` by default. If you think the server might be running on a different port, you need to alter `server.py` to reflect those changes for `CELERY_BROKER_URL` and `CELERY_BROKER_BACKEND`, and restart the celery worker to ensure the correct operation of the actual continuity checks.
+
 To view the webpage, navigate to `127.0.0.1:5000/`.
 ### Apache Daemon
 Instructions coming soon...
