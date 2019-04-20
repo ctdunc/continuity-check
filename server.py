@@ -10,13 +10,19 @@ from celery import Celery
 from logic.sql_client import sqlclient
 from logic.continuity import perform_check
 
+# make regex variables for later use 
 findint = re.compile('\d')
 betweenbrackets = re.compile('\[(.*?)\]')
 findhyphen = re.compile('[^-]*')
+
+# initialize database object
+with open('.botconfig') as bc:
+    botinfo = bc.readlines()
+botinfo = [s.replace("\n","") for s in botinfo]
 db = sqlclient(host='localhost',
-        db='continuity_check',
-        user='cdms',
-        pw='cdms',
+        db=botinfo[2],
+        user=botinfo[0],
+        pw=botinfo[1],
         history='run_history',
         data='run_data',
         naming='channel_naming',
