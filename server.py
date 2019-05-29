@@ -5,6 +5,7 @@ from requests import post
 from flask_socketio import SocketIO
 from redis import Redis
 from itertools import groupby
+from functools import reduce
 from celery import Celery
 from logic.sql_client import sqlclient
 from logic.continuity import perform_check
@@ -42,7 +43,7 @@ def continuity_check(self,url,tablename,expected_values, channel_naming, dmm_ip=
         key = row.get('key')
         value = row.get('value')
         n = int(row.get('rownum'))
-        checks_complete += n 
+        checks_complete += n
 
         # posts to webpage for live update on check
         post(
@@ -78,9 +79,7 @@ def startcheck():
     channels = request.form.getlist('channels[]')
     signals = request.form.getlist('signals[]')
     tests = request.form.getlist('continuity[]')
-    signal_g = lambda x,s: s[x[0]:x[1]]
-    signals = [signal_g(findhyphen.search(i).span(),i) for i in signals]
-
+    
     # metadata has a nested structure, so I need to do some fancy regex 
     # searching to get key-value pairs out of URLEncoded data
     meta_keys = [k for k in request.form.to_dict().keys() if k.startswith('metadata')]
@@ -89,8 +88,6 @@ def startcheck():
         sp = betweenbrackets.search(k).span()
         metadata[k[sp[0]+1:sp[1]-1]] = request.form.getlist(k)[0]
 
-    print(metadata)    
-    db.commit_run(metadata)
 
     # format Channel Layout
     channelGrouper = lambda c: [c[findint.search(c).span()[0]:],c[:findint.search(c).span()[0]-1]]
@@ -101,16 +98,15 @@ def startcheck():
     channels = dict(channel_tests)
 
     # format Signal Layout
-    signalGrouper = lambda c: [c[2], c[0]]
-    signal_types = sorted([signalGrouper(s) for s in db.get_channel_layout()],
-            key=lambda x: x[1])
-    signal_types_dummy = {}
-    for t, sig in groupby(signal_types, lambda x: x[1]):
+    signals = [(s[:findhyphen.search(s).span()[1]],s[findhyphen.search(s).span()[1]+1:]) for s in signals]
+    signal_types = {}
+    for t, sig in groupby(signals, lambda x: x[0]):
         for s in sig:
-            if s[0] in signals:
-                signal_types_dummy.setdefault(s[1], []).append(s[0])
-    signal_keys = list(filter(lambda k: k in channels.keys(),signal_types_dummy.keys()))
-    signal_types = dict([(k,signal_types_dummy[k]) for k in signal_keys])
+            if s in signals:
+                signal_types.setdefault(s[1], []).append(s[0])
+    signal_keys = list(filter(lambda k: k in channels.keys(),signal_types.keys()))
+    signal_types = dict([(k,signal_types[k]) for k in signal_keys])
+
     # get expected values, format/execute SQL request for expected values
     cont = ''
     if 'connected' in tests:
@@ -121,7 +117,7 @@ def startcheck():
         cont='0'
 
     continuity_command = ' (Expected_Continuity IN ('+cont+'))'
-    test_command = ' WHERE ('
+    test_command = ' ('
     for k in signal_keys:
         c = channels[k]
         c.append(-1)
@@ -134,16 +130,16 @@ def startcheck():
             matrix_selector = '(Signal_name = \"'+signal+'\" AND Channel IN '+cstr+') OR'
             test_command += signal_selector
 
-    #[:-2] gets rid of the final OR statement on the SQL command
-    print(test_command)
+    #[:-2] gets rid of the final OR statement on the SQL command)
     test_command = test_command[:-3]+') AND '+continuity_command
-    print(test_command)
-    expected_values = db.get_expected_value(tests=test_command)
-    matrix_values = db.get_channel_naming() 
+    expected_values = db.fetch_expected(expectedname=[metadata['expected_key']],tests=test_command)
+    matrix_values = db.fetch_naming(layoutname=[metadata['naming_key']])[metadata['naming_key']]
+
+    run_key = db.commit_run(metadata)
     task = continuity_check.delay(url_for('checkupdate',_external=True),
             expected_values=expected_values,
             channel_naming=matrix_values,
-            tablename=tablename)
+            tablename=run_key)
 
     return jsonify(0)
 
@@ -157,9 +153,9 @@ def checkupdate():
     # (tablename==runkey)=true, I just didn't rename things after rewrite
     if isinstance(value[0],list):
         for i in value:
-            db.insert_run_row(tablename,i)
+            db.commit_run_row(tablename,i)
     else:
-        db.insert_run_row(tablename,value)
+        db.commit_run_row(tablename,value)
 
     socketio.emit('checkUpdate',data)
     return '0'
@@ -170,7 +166,7 @@ def return_channel_layout(namingkey):
         channel_layout=db.fetch_naming()
     else:
         n = db.fetch_naming([namingkey])[namingkey]
-        
+         
         n = sorted(n, key=lambda tup: tup[-1])
         channel_layout = {}
         for key, group in groupby(n, lambda x: x[-1]):
@@ -185,10 +181,24 @@ def return_channel_layout(namingkey):
             channel_layout[key]={'channels':chan_num,'signals':siglist}
     return jsonify(channel_layout)
 
+@app.route("/channel-naming/<namingkey>", methods=['GET'])
+def return_channel_naming(namingkey):
+    n = db.fetch_naming([namingkey])[namingkey]
+        
+    return(jsonify(n)) 
+        
 @app.route("/expected-value",methods=['GET'])
 def return_expected_values():
-    expected = db.fetch_expected()
+    expected = list(db.fetch_expected())
+    expected = groupby(expected, lambda x: x[8])
+    result = []
+    for name, table in expected:
+        result.append(name)
+    return(jsonify(result))
 
+@app.route("/expected-value/<ekey>", methods=["GET"])
+def return_expectation(ekey):
+    expected = db.fetch_expected([ekey])
     return(jsonify(expected))
 
 @app.route("/run-opts", methods=['GET'])

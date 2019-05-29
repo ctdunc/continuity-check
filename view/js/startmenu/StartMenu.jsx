@@ -139,7 +139,8 @@ export default class StartMenu extends Component {
 	submit(e){
 		//validate form
 		if(
-			(Object.keys(this.state.metadata)==Object.keys(selectinputs))
+			//all fields of form are filled out
+			(Object.keys(this.state.metadata).sort().join(',')===Object.keys(selectinputs).sort().join(','))
 			&&
 			(this.state.selected.channels !== undefined && this.state.selected.channels.length != 0)
 			&&

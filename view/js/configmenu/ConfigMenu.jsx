@@ -25,9 +25,11 @@ export default class ConfigMenu extends Component{
 	constructor(props,context){
 		super(props,context);
 		this.state = {
-			expected:{},
-			naming:{}
+			expected:[],
+			naming:[],
+			expanded:''
 		}
+
 		this.createItem = this.createItem.bind(this);
 	}
 	componentDidMount(){
@@ -37,20 +39,19 @@ export default class ConfigMenu extends Component{
 			})
 		});
 		$.get(window.location.href+'/channel-layout/all', (data)=> {
-			console.log(data)
 			this.setState({
 				naming:data
 			})
 		});
 	}
 
-	createItem(key,table,columns){
+	createItem(key,columns,urlbeg){
 		return(
 			<details className='l-2' key={key}>
 				<summary>{key}</summary>
 					<ConfigContainer tableName={key} 
 					columns={columns}
-					entries={table}
+					urlLead={urlbeg}
 					className='config-container'/>
 			</details>
 			);
@@ -58,32 +59,53 @@ export default class ConfigMenu extends Component{
 
 	render(){
 		return(
-			<div className="config-menu">
-				<details className='l-1'>
-					<summary>Expected Values</summary>
-					{Object.keys(this.state.expected).map(key => {
+			<div className="menu">
+				<div className="signal">
+					<h1>Signal Layout</h1>
+					{this.state.expected.map(key => {
 						return(
 							this.createItem(
 								key,
-								this.state.expected[key],
-								expectedColumns
+								expectedColumns,
+								'expected-value'
 							)
 						)
 					})}
-				</details>
-				<details className='l-1'>
-					<summary>Channel Layout</summary>
+				</div>
+				<div className="channel">
+					<h1>Channel Layout</h1>
 					{Object.keys(this.state.naming).map(key => {
 						return(
 							this.createItem(
 								key,
-								this.state.naming[key],
-								namingColumns
+								namingColumns,
+								'channel-naming'						
 							)
 						)
 					})}
-				</details>
+				</div>
 			</div>
 			);
+	}
+}
+
+class ConfigItem extends Component{
+	constructor(props,context){
+		super(props,context);
+		this.setState({
+			open: false
+		});
+	}
+
+	render(){
+		return(
+			<details className="config-menu">
+				<summary>{this.props.key}</summary>
+				<ConfigContainer tableName={this.props.key}
+					columns={this.props.columns}
+					urlLead={this.props.urlLead}
+					className='config-container'/>
+			</details>
+		);
 	}
 }

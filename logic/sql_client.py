@@ -1,11 +1,9 @@
-import MySQLdb
+import pymysql
 import string
-import random
+import random 
 import datetime
 from itertools import groupby
 
-# define convenient and repeated commands
-tabne = 'CREATE TABLE IF NOT EXISTS ' # tabne short for TABle Not Exists
 
 class sqlclient:
     def __init__(self, host = '', history='', naming='', expected='', data='',
@@ -22,13 +20,14 @@ class sqlclient:
      
     def __connect(self):
         try:
-            connection = MySQLdb.connect(host=self.host,
+            connection = pymysql.connect(host=self.host,
                 user=self.user,
                 passwd=self.pw,
                 db=self.db)
             return connection
         except Exception as e:
-            return ('Error in sqlclient.connect! '+str(e))
+            raise e
+            
 
     def commit_run(self, metadata):
         connection = self.__connect()
@@ -48,29 +47,42 @@ class sqlclient:
 
         # commit to run history table
         log_command = ("INSERT INTO "+self.run_history+" (\
-                Run_key, Expected_key, Naming_key, Institution, VIB, Device, Temperature, Date)\
+                Run_key, Expected_key, Naming_key, Institution, VIB, Device, Temperature, Date, Wiring)\
                 VALUES (\"{check}\", \"{ekey}\", \"{nkey}\",\"{inst}\", \
-                    \"{vib}\", \"{dev}\", {temp}, \"{date}\" );")
+                    \"{vib}\", \"{dev}\", {temp}, \"{date}\", \"{w}\");")
         log_command=log_command.format(
                 check=run_key,
-                ekey=expected_key,
-                nkey=naming_key,
-                inst=institution,
-                vib=vib,
-                dev=device,
-                temp=temperature,
-                date=datetime.datetime.now().strftime('%Y-%m-%d %x')
+                ekey=metadata['expected_key'],
+                nkey=metadata['naming_key'],
+                inst=metadata['institution'],
+                vib=metadata['vib'],
+                dev=metadata['device'],
+                temp=0, #TODO: fix temperature input
+                date=datetime.datetime.now().strftime('%Y-%m-%d %x'),
+                w=metadata['wiring']
                 )
         cursor.execute(log_command)
-
+        connection.commit()
         connection.close()
-        return 0
+        return run_key
+
     def commit_run_row(self, runkey, data):
         connection = self.__connect()
         cursor = connection.cursor()
-
+        cmd = "INSERT INTO "+self.run_data+" (Run_key, Signal_1, Channel_1,\
+                Signal_2, Channel_2, Minimum, Maximum, Measured, Unit, Pass)\
+                VALUES (\"{rk}\",\"{s1}\",\"{c1}\",\"{s2}\",\"{c2}\",{mi},{ma},{me},\
+                \"{u}\",{p});"
+        cmd = cmd.format(
+                s1=data[0],c1=data[1],s2=data[2],c2=data[3],mi=data[5],ma=data[6],
+                me=data[12],u="Ohm",p=data[11],rk=runkey
+                )
+        cursor.execute(cmd)
+        connection.commit()
         connection.close()
+
         return 0
+
     def commit_expected(self):
         connection = self.__connect()
         cursor = connection.cursor()
@@ -108,30 +120,25 @@ class sqlclient:
         connection.close()
         return run
     
-    def fetch_expected(self,expectedname=[]):
+    def fetch_expected(self,expectedname=[], tests=None):
         connection = self.__connect()
         cursor = connection.cursor()
 
-        result = {}
-        if expectedname:
-            for name in expectedname:
-                cmd = ("SELECT Signal_1, Channel_1, Signal_2, Channel_2, \
-                        Expected_Continuity, Minimum, Maximum, Naming_key FROM "
-                    +self.expected_values+" WHERE Expected_key=\""+name+"\";")
-                cursor.execute(cmd)
-                expected=cursor.fetchall()
-                
-                result[name]=layout
-        else:
-            cmd = "SELECT Signal_1, Channel_1, Signal_2, Channel_2, \
-                    Expected_Continuity, Minimum, Maximum, Naming_key, \
-                    Expected_key FROM "+self.expected_values+";"
-            cursor.execute(cmd)
-            tosort=cursor.fetchall()
-            expectedname = groupby(tosort, lambda x: x[8])
-            for name, expected in expectedname:
-                result[name]=[i[:8] for i in expected]
-        
+        cmd = ("SELECT Signal_1, Channel_1, Signal_2, Channel_2, Expected_Continuity, Minimum, Maximum, Naming_key, Expected_key FROM "
+               +self.expected_values)
+        if expectedname or tests:
+            cmd = cmd+" WHERE ("
+            if expectedname: 
+                expectedtests = "\" OR Expected_key=\"".join(expectedname)
+                cmd = cmd+" (Expected_key=\""+expectedtests+"\")"
+                if tests:
+                    cmd = cmd+" AND "+tests
+            elif tests:
+                cmd = cmd+tests
+            cmd = cmd+")"
+        cmd=cmd+";"
+        cursor.execute(cmd)
+        result = cursor.fetchall()
         connection.close()
         return result
 
@@ -177,17 +184,16 @@ class sqlclient:
         cursor.execute(naming_cmd)
         naming_tabs = cursor.fetchall()
         inst,wire,dev,vib= [],[],[],[]
-        try:
-            cursor.execute(etc_cmd)
-            etc = cursor.fetchall()
-            sortetc =  lambda x: x[0],x[1],x[2],x[3]
-            for i,w,d,n in sortetc(etc):
-                inst.append(i)
-                wire.append(w)
-                dev.append(d)
-                vib.append(n)
-        except:
-            pass
+        cursor.execute(etc_cmd)
+        etc = cursor.fetchall()
+        sortetc =lambda x: [x[0],x[1],x[2],x[3]]
+        for i,w,d,n in sortetc(etc):
+            inst.append(i)
+            wire.append(w)
+            dev.append(d)
+            vib.append(n)
+
+
         result['expected_key']=[i for i in expected_tabs]
         result['naming_key']=[i for i in naming_tabs]
         result['institution']=inst
