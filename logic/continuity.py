@@ -11,7 +11,7 @@ ERR = 'KEY_ERROR'
 
 def perform_check(expected_values,channel_naming,dmm_ip=''):
     try:
-        dmm = dmm_interface(dmm_ip)
+        dmm = dmm_interface()
     except:
         pass
     expected_values=np.array(expected_values)
@@ -40,11 +40,13 @@ def perform_check(expected_values,channel_naming,dmm_ip=''):
     #split tests into arrays of disconnected and connected tests
     tests_disconnect = tests[np.where(tests[:,4]=='0')]
     tests_connect = tests[np.where(tests[:,4]=='1')]
+
     # perform connected tests
     for row in tests_connect:
-        #naming done below for code legibility
-        mini,maxi,matrix1,matrix2 = float(row[5]),float(row[6]),row[7],row[8]
-        diff = mini-maxi 
+        mini, maxi, matrix1, matrix2 = float(row[5]), float(row[6]), row[7], row[8]
+
+        # TODO: Change to close multiple channels at once, has Toshin tested this?
+        # Otherwise, we just need to come up with a cute way to do this fast.
         measurement = rand.uniform(mini-diff,maxi+diff)
         success = 0
         if mini < measurement < maxi:
@@ -93,8 +95,7 @@ def parallell_disconnect(s1,rows,dmm):
                yield from parallell_disconnect(s1,c,dmm)
            elif len(c)==1:
                c = c[0]
-               #measurement = dmm.test_individual(c[7],c[8])
-               measurement = rand.uniform(mini-10000,mini+10000)
+               measurement = dmm.measure_R(c[7],c[8])
                print([mini,measurement])
                if mini < measurement:
                    success = 1

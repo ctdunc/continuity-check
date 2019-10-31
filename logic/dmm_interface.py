@@ -1,33 +1,43 @@
 import telnetlib
 
 class dmm_interface:
+	def __init__(self,host='192.168.5.120',silent=False):
+		self.host=host
+		self.silent = silent
+		self.tn=telnetlib.Telnet(host)
+		self.initialized = False
+		self.reset()
 
-    def __init__(self,host='192.168.5.120'):
-       self.host = host
+	def reset(self):
+		if self.initialized:
+			return
+		self.send('channel.open("allslots")')
+		self.send('reset()')
+		self.initialized = True
+		
+	def send(self,cmd,timeout=2):
+		if 'reset' not in cmd:
+			self.initialized = False		
+		self.tn.write(cmd.strip()+'\n')
+		if not self.silent:
+			print('> '+cmd.strip())
+		result= self.tn.read_until('\n',timeout).strip()
+		if not self.silent and result != '':
+			print(result)
+		return result
 
-       self.tn=telnetlib.Telnet(host)
-       self.tn.write("load_functions()\n".encode('ascii'))         
+	def measure_R(self, ch1,ch2,rng=1e7):
+		self.reset()
+		self.send('dmm.func="twowireohms"')
+		self.send('dmm.range=%d'%rng)
+		self.send('dmm.autodelay=1')
+		self.send('channel.close("10911")') # backpanel
+		self.send('channel.close("%s,%s")'%(ch1,ch2))
+		result=self.send('print(dmm.measure())')
+		self.reset()
+		
+		return result
 
-    def __measure(self):
-        measurement = self.tn.read_until(("Ohm").encode('ascii'))
-        measurement = measurement.split()
-        measurement = float(measurement[0])
-        
-        return measurement
-
-    def test_individual(self, sig1, sig2):
-        execute = ("resistance_test(\""+sig1+"\""+sig2+"\")\n").encode('ascii')
-        self.tn.write(execute)
-        result = self.__measure()
-        return result 
-
-
-    def test_parallel(self, sig1, sig2_list):
-        sig2_str = "\""
-        for s in sig2_list:
-            sig2_str+=s+"\",\""
-        sig2_str = sig2_str[:-2]
-        execute = ("open_test(\""+sig1+"\",{"+sig2_str+")\n").encode('ascii')
-        self.tn.write(execute)
-        result = self.__measure()
-        return result
+if __name__ == '__main__':
+	dmm = dmm_interface()
+	dmm.measure_R('11189','11286')
