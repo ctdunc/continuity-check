@@ -35,7 +35,7 @@
     "react-table": "^6.8.6",
     "style-loader": "^0.23.1",
     "webpack": "^4.28.1",
-    "webpack-cli": "^3.2.1"
+    "webpack-cli": "^3.3.12"
   },
   "dependencies": {
     "fs": "0.0.1-security",
